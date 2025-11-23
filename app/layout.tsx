@@ -9,10 +9,6 @@ import { useState, useEffect } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
-}
-
 export default function RootLayout({
   children,
 }: {
