@@ -17,7 +17,7 @@ export async function GET(
 
     // Get sharpener details
     const now = new Date()
-    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const fourteenDaysFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
     
     const sharpener = await prisma.sharpener.findUnique({
       where: { sharpenerId },
@@ -38,7 +38,7 @@ export async function GET(
               where: {
                 availableDate: {
                   gte: now,
-                  lte: sevenDaysFromNow
+                  lte: fourteenDaysFromNow
                 }
               },
               orderBy: {
