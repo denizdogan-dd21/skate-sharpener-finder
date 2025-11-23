@@ -19,20 +19,18 @@ async function geocodeAddress(city?: string, state?: string, zipCode?: string, c
   try {
     let url: string
     
-    // If zipCode is provided, prioritize it with structured query
+    // If zipCode is provided, use ONLY zipCode for most accurate results
     if (zipCode) {
       const params = new URLSearchParams({
         postalcode: zipCode,
+        country: country,
         format: 'json',
         limit: '1'
       })
-      if (city) params.append('city', city)
-      if (state) params.append('state', state)
-      params.append('country', country)
       
       url = `https://nominatim.openstreetmap.org/search?${params.toString()}`
     } else {
-      // Fallback to regular query if no zipCode
+      // Fallback to city/state query if no zipCode
       const parts = []
       if (city) parts.push(city)
       if (state) parts.push(state)
