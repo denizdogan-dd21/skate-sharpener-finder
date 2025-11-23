@@ -181,20 +181,20 @@ export default function SharpenerProfilePage() {
 
         {/* Sharpener Header */}
         <div className="card mb-6">
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">{sharpener.name}</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">{sharpener.name}</h1>
               {sharpener.bio && (
-                <p className="text-gray-600 mt-2">{sharpener.bio}</p>
+                <p className="text-sm sm:text-base text-gray-600 mt-2">{sharpener.bio}</p>
               )}
             </div>
             {sharpener.averageRating && (
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <div className="flex items-center">
-                  <span className="text-yellow-500 text-2xl mr-2">⭐</span>
-                  <span className="text-2xl font-bold">{sharpener.averageRating.toFixed(1)}</span>
+                  <span className="text-yellow-500 text-xl sm:text-2xl mr-2">⭐</span>
+                  <span className="text-xl sm:text-2xl font-bold">{sharpener.averageRating.toFixed(1)}</span>
                 </div>
-                <p className="text-gray-500 text-sm">{sharpener.totalRatings} reviews</p>
+                <p className="text-gray-500 text-xs sm:text-sm">{sharpener.totalRatings} reviews</p>
               </div>
             )}
           </div>
@@ -202,22 +202,22 @@ export default function SharpenerProfilePage() {
 
         {/* Locations */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Locations</h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Locations</h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-2 gap-4 sm:gap-6">
             {sharpener.locations.map((location: any) => (
               <div key={location.locationId} className="card">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{location.locationName}</h3>
-                <p className="text-gray-600 mb-1">{location.city}, {location.state} {location.zipCode}</p>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{location.locationName}</h3>
+                <p className="text-sm sm:text-base text-gray-600 mb-1">{location.city}, {location.state} {location.zipCode}</p>
                 
                 {/* Machines */}
                 {location.machines.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="font-semibold text-gray-700 mb-2">Machines:</h4>
+                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">Machines:</h4>
                     <div className="space-y-2">
                       {location.machines.map((machine: any) => (
-                        <div key={machine.machineId} className="bg-gray-50 p-3 rounded">
-                          <p className="font-medium text-gray-900">{machine.machineType}</p>
-                          <p className="text-sm text-gray-600">Radius options: {machine.radiusOptions}</p>
+                        <div key={machine.machineId} className="bg-gray-50 p-2 sm:p-3 rounded">
+                          <p className="text-sm sm:text-base font-medium text-gray-900">{machine.machineType}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">Radius options: {machine.radiusOptions}</p>
                         </div>
                       ))}
                     </div>
@@ -227,7 +227,7 @@ export default function SharpenerProfilePage() {
                 {/* Availabilities */}
                 {location.availabilities.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="font-semibold text-gray-700 mb-2">Available Times:</h4>
+                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">Available Times:</h4>
                     <div className="space-y-2">
                       {location.availabilities.map((avail: any) => (
                         <div
@@ -253,18 +253,18 @@ export default function SharpenerProfilePage() {
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="font-medium text-gray-900">
+                              <p className="text-sm sm:text-base font-medium text-gray-900">
                                 {new Date(avail.availableDate).toLocaleDateString('en-US', {
                                   weekday: 'short',
                                   month: 'short',
                                   day: 'numeric'
                                 })}
                               </p>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-xs sm:text-sm text-gray-600">
                                 {avail.startTime} - {avail.endTime}
                               </p>
                             </div>
-                            <p className="text-lg font-bold text-primary-600">${avail.price}</p>
+                            <p className="text-base sm:text-lg font-bold text-primary-600">${avail.price}</p>
                           </div>
                         </div>
                       ))}
@@ -279,15 +279,15 @@ export default function SharpenerProfilePage() {
         {/* Booking Form */}
         {selectedAvailability && (
           <div className="card mb-6 bg-primary-50 border-2 border-primary-600">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Request Appointment</h3>
-            <div className="bg-white p-4 rounded-lg mb-4">
-              <p className="text-gray-900">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Request Appointment</h3>
+            <div className="bg-white p-3 sm:p-4 rounded-lg mb-4">
+              <p className="text-sm sm:text-base text-gray-900">
                 <strong>Date:</strong> {new Date(selectedAvailability.availableDate).toLocaleDateString()}
               </p>
-              <p className="text-gray-900">
+              <p className="text-sm sm:text-base text-gray-900">
                 <strong>Time:</strong> {selectedAvailability.startTime} - {selectedAvailability.endTime}
               </p>
-              <p className="text-gray-900">
+              <p className="text-sm sm:text-base text-gray-900">
                 <strong>Price:</strong> ${selectedAvailability.price}
               </p>
             </div>
@@ -363,10 +363,10 @@ export default function SharpenerProfilePage() {
                 onChange={(e) => setBookingNotes(e.target.value)}
               />
             </div>
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={handleBooking}
-                className="btn-primary flex-1"
+                className="btn-primary flex-1 w-full sm:w-auto"
               >
                 Confirm Booking Request
               </button>
@@ -375,7 +375,7 @@ export default function SharpenerProfilePage() {
                   setSelectedAvailability(null)
                   setSelectedInterval('')
                 }}
-                className="btn-secondary"
+                className="btn-secondary w-full sm:w-auto"
               >
                 Cancel
               </button>
@@ -386,13 +386,13 @@ export default function SharpenerProfilePage() {
         {/* Reviews */}
         {sharpener.recentReviews.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Reviews</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Recent Reviews</h2>
             <div className="space-y-4">
               {sharpener.recentReviews.map((review: any) => (
                 <div key={review.ratingId} className="card">
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row items-start justify-between mb-2 gap-2">
                     <div>
-                      <p className="font-semibold text-gray-900">{review.userName}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{review.userName}</p>
                       <div className="flex items-center mt-1">
                         {[...Array(5)].map((_, i) => (
                           <span key={i} className={i < review.rating ? 'text-yellow-500' : 'text-gray-300'}>
@@ -401,12 +401,12 @@ export default function SharpenerProfilePage() {
                         ))}
                       </div>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {new Date(review.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   {review.comment && (
-                    <p className="text-gray-700">{review.comment}</p>
+                    <p className="text-sm sm:text-base text-gray-700">{review.comment}</p>
                   )}
                 </div>
               ))}
