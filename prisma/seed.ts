@@ -223,12 +223,6 @@ async function main() {
     }
   })
 
-  // Mark that availability as booked
-  await prisma.availability.update({
-    where: { availabilityId: availabilities[10].availabilityId },
-    data: { isBooked: true }
-  })
-
   console.log('Seed completed successfully!')
   console.log('\nSample accounts:')
   console.log('User: jane.user@example.com / Password123')
