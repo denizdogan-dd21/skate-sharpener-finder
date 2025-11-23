@@ -35,8 +35,11 @@ export default function SharpenerDashboard() {
     availableDate: '',
     startTime: '',
     endTime: '',
-    price: ''
+    price: '',
+    repeatWeeks: '1'
   })
+
+  const [editingAvailability, setEditingAvailability] = useState<number | null>(null)
 
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -114,7 +117,13 @@ export default function SharpenerDashboard() {
       const res = await fetch(url)
       const data = await res.json()
       if (res.ok) {
-        setAvailabilities(data.availabilities || [])
+        // Sort availabilities by date and time (ascending)
+        const sorted = (data.availabilities || []).sort((a: any, b: any) => {
+          const dateA = new Date(`${a.availableDate}T${a.startTime}`)
+          const dateB = new Date(`${b.availableDate}T${b.startTime}`)
+          return dateA.getTime() - dateB.getTime()
+        })
+        setAvailabilities(sorted)
       }
     } catch (err) {
       console.error('Failed to load availabilities')
@@ -230,27 +239,120 @@ export default function SharpenerDashboard() {
     setMessage('')
 
     try {
-      const res = await fetch('/api/sharpener/availability', {
-        method: 'POST',
+      const repeatWeeks = parseInt(availabilityForm.repeatWeeks) || 1
+      const baseDate = new Date(availabilityForm.availableDate)
+      
+      // Create availabilities for each week
+      for (let week = 0; week < repeatWeeks; week++) {
+        const availableDate = new Date(baseDate)
+        availableDate.setDate(availableDate.getDate() + (week * 7))
+        
+        const res = await fetch('/api/sharpener/availability', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            locationId: selectedLocation,
+            machineId: selectedMachine,
+            availableDate: availableDate.toISOString().split('T')[0],
+            startTime: availabilityForm.startTime,
+            endTime: availabilityForm.endTime,
+            price: availabilityForm.price
+          })
+        })
+
+        if (!res.ok) {
+          const data = await res.json()
+          setError(data.error || `Failed to add availability for week ${week + 1}`)
+          return
+        }
+      }
+
+      setMessage(repeatWeeks > 1 
+        ? `Successfully added ${repeatWeeks} weekly availabilities!` 
+        : 'Availability added successfully!')
+      setAvailabilityForm({ availableDate: '', startTime: '', endTime: '', price: '', repeatWeeks: '1' })
+      loadAvailabilities(selectedLocation, selectedMachine)
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleEditAvailability = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingAvailability) return
+
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch(`/api/sharpener/availability/${editingAvailability}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          locationId: selectedLocation,
-          machineId: selectedMachine,
-          ...availabilityForm
+          availableDate: availabilityForm.availableDate,
+          startTime: availabilityForm.startTime,
+          endTime: availabilityForm.endTime,
+          price: availabilityForm.price
         })
       })
 
       const data = await res.json()
       if (res.ok) {
-        setMessage('Availability added successfully!')
-        setAvailabilityForm({ availableDate: '', startTime: '', endTime: '', price: '' })
-        loadAvailabilities(selectedLocation, selectedMachine)
+        setMessage('Availability updated successfully!')
+        setAvailabilityForm({ availableDate: '', startTime: '', endTime: '', price: '', repeatWeeks: '1' })
+        setEditingAvailability(null)
+        if (selectedLocation && selectedMachine) {
+          loadAvailabilities(selectedLocation, selectedMachine)
+        }
       } else {
-        setError(data.error || 'Failed to add availability')
+        setError(data.error || 'Failed to update availability')
       }
     } catch (err) {
       setError('An error occurred')
     }
+  }
+
+  const handleDeleteAvailability = async (availabilityId: number) => {
+    if (!confirm('Are you sure you want to delete this availability?')) {
+      return
+    }
+
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch(`/api/sharpener/availability/${availabilityId}`, {
+        method: 'DELETE'
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Availability deleted successfully!')
+        if (selectedLocation && selectedMachine) {
+          loadAvailabilities(selectedLocation, selectedMachine)
+        }
+      } else {
+        setError(data.error || 'Failed to delete availability')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const startEditAvailability = (avail: any) => {
+    setEditingAvailability(avail.availabilityId)
+    setAvailabilityForm({
+      availableDate: avail.availableDate.split('T')[0],
+      startTime: avail.startTime,
+      endTime: avail.endTime,
+      price: avail.price.toString(),
+      repeatWeeks: '1'
+    })
+  }
+
+  const cancelEdit = () => {
+    setEditingAvailability(null)
+    setAvailabilityForm({ availableDate: '', startTime: '', endTime: '', price: '', repeatWeeks: '1' })
   }
 
   if (!user) return null
@@ -653,11 +755,13 @@ export default function SharpenerDashboard() {
         {activeTab === 'availability' && (
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Add Availability</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {editingAvailability ? 'Edit Availability' : 'Add Availability'}
+              </h2>
               {!selectedLocation || !selectedMachine ? (
                 <p className="text-gray-600">Please select a location and machine first</p>
               ) : (
-                <form onSubmit={handleAddAvailability} className="space-y-4">
+                <form onSubmit={editingAvailability ? handleEditAvailability : handleAddAvailability} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Location
@@ -669,7 +773,9 @@ export default function SharpenerDashboard() {
                         const locId = parseInt(e.target.value)
                         setSelectedLocation(locId)
                         loadMachines(locId)
+                        cancelEdit()
                       }}
+                      disabled={!!editingAvailability}
                     >
                       {locations.map((loc) => (
                         <option key={loc.locationId} value={loc.locationId}>
@@ -685,7 +791,11 @@ export default function SharpenerDashboard() {
                     <select
                       className="input-field"
                       value={selectedMachine || ''}
-                      onChange={(e) => setSelectedMachine(parseInt(e.target.value))}
+                      onChange={(e) => {
+                        setSelectedMachine(parseInt(e.target.value))
+                        cancelEdit()
+                      }}
+                      disabled={!!editingAvailability}
                     >
                       {machines.map((machine) => (
                         <option key={machine.machineId} value={machine.machineId}>
@@ -746,9 +856,40 @@ export default function SharpenerDashboard() {
                       onChange={(e) => setAvailabilityForm({ ...availabilityForm, price: e.target.value })}
                     />
                   </div>
-                  <button type="submit" className="btn-primary w-full">
-                    Add Availability
-                  </button>
+                  {!editingAvailability && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Repeat Weekly (Number of Weeks)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="52"
+                        required
+                        className="input-field"
+                        placeholder="1"
+                        value={availabilityForm.repeatWeeks}
+                        onChange={(e) => setAvailabilityForm({ ...availabilityForm, repeatWeeks: e.target.value })}
+                      />
+                      <p className="text-xs text-gray-600 mt-1">
+                        Creates the same time slot for the next X weeks (e.g., every Monday at 9:00-17:00)
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex gap-3">
+                    <button type="submit" className="btn-primary flex-1">
+                      {editingAvailability ? 'Update Availability' : 'Add Availability'}
+                    </button>
+                    {editingAvailability && (
+                      <button 
+                        type="button" 
+                        onClick={cancelEdit}
+                        className="btn-secondary"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </form>
               )}
             </div>
@@ -764,12 +905,17 @@ export default function SharpenerDashboard() {
                       key={avail.availabilityId}
                       className={`p-3 border rounded-lg ${
                         avail.isBooked ? 'border-gray-300 bg-gray-100' : 'border-green-300 bg-green-50'
-                      }`}
+                      } ${editingAvailability === avail.availabilityId ? 'ring-2 ring-primary-600' : ''}`}
                     >
-                      <div className="flex justify-between items-start">
+                      <div className="flex justify-between items-start mb-2">
                         <div>
                           <p className="font-bold text-gray-900">
-                            {new Date(avail.availableDate).toLocaleDateString()}
+                            {new Date(avail.availableDate).toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
                           </p>
                           <p className="text-sm text-gray-600">
                             {avail.startTime} - {avail.endTime}
@@ -783,6 +929,22 @@ export default function SharpenerDashboard() {
                           )}
                         </div>
                       </div>
+                      {!avail.isBooked && (
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => startEditAvailability(avail)}
+                            className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition flex-1"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAvailability(avail.availabilityId)}
+                            className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition flex-1"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
