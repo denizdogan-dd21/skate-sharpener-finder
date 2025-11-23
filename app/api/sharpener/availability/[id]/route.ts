@@ -13,9 +13,18 @@ export async function PATCH(
     const body = await request.json()
     const { availableDate, startTime, endTime, price } = body
 
-    // Check if availability exists and is not booked
+    // Check if availability exists and has no pending/confirmed appointments
     const existing = await prisma.availability.findUnique({
-      where: { availabilityId }
+      where: { availabilityId },
+      include: {
+        appointments: {
+          where: {
+            status: {
+              in: ['PENDING', 'CONFIRMED']
+            }
+          }
+        }
+      }
     })
 
     if (!existing) {
@@ -25,9 +34,9 @@ export async function PATCH(
       )
     }
 
-    if (existing.isBooked) {
+    if (existing.appointments.length > 0) {
       return NextResponse.json(
-        { error: 'Cannot edit a booked availability' },
+        { error: 'Cannot edit availability with pending or confirmed appointments' },
         { status: 400 }
       )
     }
