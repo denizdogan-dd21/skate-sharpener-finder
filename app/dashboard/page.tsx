@@ -19,8 +19,8 @@ export default function SharpenerDashboard() {
   const [locationForm, setLocationForm] = useState({
     locationName: '',
     streetAddress: '',
-    city: '',
-    state: '',
+    city: 'Munich',
+    state: 'Bayern',
     zipCode: ''
   })
 
@@ -176,7 +176,7 @@ export default function SharpenerDashboard() {
       const data = await res.json()
       if (res.ok) {
         setMessage('Location added successfully!')
-        setLocationForm({ locationName: '', streetAddress: '', city: '', state: '', zipCode: '' })
+        setLocationForm({ locationName: '', streetAddress: '', city: 'Munich', state: 'Bayern', zipCode: '' })
         loadLocations(user.sharpenerId)
       } else {
         setError(data.error || 'Failed to add location')
@@ -495,7 +495,7 @@ export default function SharpenerDashboard() {
                       type="text"
                       required
                       className="input-field"
-                      placeholder="Boston"
+                      placeholder="Munich"
                       value={locationForm.city}
                       onChange={(e) => setLocationForm({ ...locationForm, city: e.target.value })}
                     />
@@ -506,7 +506,7 @@ export default function SharpenerDashboard() {
                       type="text"
                       required
                       className="input-field"
-                      placeholder="MA"
+                      placeholder="Bayern"
                       value={locationForm.state}
                       onChange={(e) => setLocationForm({ ...locationForm, state: e.target.value })}
                     />
@@ -517,7 +517,7 @@ export default function SharpenerDashboard() {
                       type="text"
                       required
                       className="input-field"
-                      placeholder="02101"
+                      placeholder="80331"
                       value={locationForm.zipCode}
                       onChange={(e) => setLocationForm({ ...locationForm, zipCode: e.target.value })}
                     />
