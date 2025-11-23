@@ -5,8 +5,8 @@ import Link from 'next/link'
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useState({
-    city: '',
-    state: '',
+    city: 'Munich',
+    state: 'Bayern',
     zipCode: ''
   })
   const [results, setResults] = useState<any[]>([])
@@ -61,7 +61,7 @@ export default function SearchPage() {
                   id="city"
                   type="text"
                   className="input-field"
-                  placeholder="e.g., Boston"
+                  placeholder="e.g., Munich"
                   value={searchParams.city}
                   onChange={(e) => setSearchParams({ ...searchParams, city: e.target.value })}
                 />
@@ -74,7 +74,7 @@ export default function SearchPage() {
                   id="state"
                   type="text"
                   className="input-field"
-                  placeholder="e.g., MA"
+                  placeholder="e.g., Bayern"
                   value={searchParams.state}
                   onChange={(e) => setSearchParams({ ...searchParams, state: e.target.value })}
                 />
@@ -87,7 +87,7 @@ export default function SearchPage() {
                   id="zipCode"
                   type="text"
                   className="input-field"
-                  placeholder="e.g., 02101"
+                  placeholder="e.g., 80331"
                   value={searchParams.zipCode}
                   onChange={(e) => setSearchParams({ ...searchParams, zipCode: e.target.value })}
                 />
