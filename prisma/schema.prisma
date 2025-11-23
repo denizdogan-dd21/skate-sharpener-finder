@@ -55,6 +55,8 @@ model SharpenerLocation {
   city             String
   state            String
   zipCode          String
+  latitude         Float?
+  longitude        Float?
   isActive         Boolean                @default(true)
   createdAt        DateTime               @default(now())
   
