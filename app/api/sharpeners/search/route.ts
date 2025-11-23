@@ -1,12 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Haversine formula to calculate distance between two points in kilometers
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371 // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+// Geocode address using OpenStreetMap Nominatim API
+async function geocodeAddress(city?: string, state?: string, zipCode?: string, country: string = 'Germany'): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const parts = []
+    if (city) parts.push(city)
+    if (state) parts.push(state)
+    if (zipCode) parts.push(zipCode)
+    parts.push(country)
+    
+    const query = parts.join(', ')
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'SkateSharpenerFinder/1.0'
+      }
+    })
+    
+    const data = await response.json()
+    
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon)
+      }
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Geocoding error:', error)
+    return null
+  }
+}
+
+// Geocode location and update database if needed
+async function ensureLocationCoordinates(location: any): Promise<void> {
+  if (location.latitude && location.longitude) {
+    return // Already has coordinates
+  }
+  
+  const coords = await geocodeAddress(location.city, location.state, location.zipCode)
+  if (coords) {
+    await prisma.sharpenerLocation.update({
+      where: { locationId: location.locationId },
+      data: {
+        latitude: coords.lat as any,
+        longitude: coords.lon as any
+      }
+    })
+    location.latitude = coords.lat
+    location.longitude = coords.lon
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const city = searchParams.get('city')
     const state = searchParams.get('state')
     const zipCode = searchParams.get('zipCode')
+    const maxDistance = 50 // Maximum distance in kilometers
 
     if (!city && !state && !zipCode) {
       return NextResponse.json(
@@ -15,24 +83,21 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Build where clause
-    const where: any = {
-      isActive: true
+    // Geocode the search address
+    const searchCoords = await geocodeAddress(city || undefined, state || undefined, zipCode || undefined)
+    
+    if (!searchCoords) {
+      return NextResponse.json(
+        { error: 'Could not find coordinates for the specified location' },
+        { status: 400 }
+      )
     }
 
-    if (city) {
-      where.city = { contains: city, mode: 'insensitive' }
-    }
-    if (state) {
-      where.state = { contains: state, mode: 'insensitive' }
-    }
-    if (zipCode) {
-      where.zipCode = zipCode
-    }
-
-    // Search for locations and include sharpener details
+    // Fetch ALL active locations (no filtering by city/state/zipCode)
     const locations = await prisma.sharpenerLocation.findMany({
-      where,
+      where: {
+        isActive: true
+      },
       include: {
         sharpener: {
           select: {
@@ -69,30 +134,52 @@ export async function GET(request: NextRequest) {
             price: true,
           }
         }
-      },
-      orderBy: {
-        sharpener: {
-          averageRating: 'desc'
-        }
       }
     })
 
-    // Format response
-    const results = locations.map(location => ({
-      sharpenerId: location.sharpener.sharpenerId,
-      sharpenerName: `${location.sharpener.firstName} ${location.sharpener.lastName}`,
-      averageRating: location.sharpener.averageRating,
-      totalRatings: location.sharpener.totalRatings,
-      locationId: location.locationId,
-      locationName: location.locationName,
-      city: location.city,
-      state: location.state,
-      zipCode: location.zipCode,
-      machines: location.machines,
-      upcomingAvailability: location.availabilities,
-    }))
+    // Ensure all locations have coordinates and calculate distances
+    const locationsWithDistance = await Promise.all(
+      locations.map(async (location: any) => {
+        await ensureLocationCoordinates(location)
+        
+        let distance = null
+        if (location.latitude && location.longitude) {
+          distance = calculateDistance(
+            searchCoords.lat,
+            searchCoords.lon,
+            location.latitude,
+            location.longitude
+          )
+        }
+        
+        return {
+          sharpenerId: location.sharpener.sharpenerId,
+          sharpenerName: `${location.sharpener.firstName} ${location.sharpener.lastName}`,
+          averageRating: location.sharpener.averageRating,
+          totalRatings: location.sharpener.totalRatings,
+          locationId: location.locationId,
+          locationName: location.locationName,
+          city: location.city,
+          state: location.state,
+          zipCode: location.zipCode,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          distance: distance,
+          machines: location.machines,
+          upcomingAvailability: location.availabilities,
+        }
+      })
+    )
 
-    return NextResponse.json({ results })
+    // Filter by maximum distance and sort by distance
+    const results = locationsWithDistance
+      .filter(loc => loc.distance !== null && loc.distance <= maxDistance)
+      .sort((a, b) => (a.distance || 0) - (b.distance || 0))
+
+    return NextResponse.json({ 
+      results,
+      searchCoordinates: searchCoords
+    })
   } catch (error) {
     console.error('Search error:', error)
     return NextResponse.json(

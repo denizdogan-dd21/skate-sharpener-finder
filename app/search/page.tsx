@@ -2,6 +2,17 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// Dynamically import MapView to avoid SSR issues with Leaflet
+const MapView = dynamic(() => import('./MapView'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center">
+      <p className="text-gray-600">Loading map...</p>
+    </div>
+  )
+})
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useState({
@@ -10,6 +21,7 @@ export default function SearchPage() {
     zipCode: ''
   })
   const [results, setResults] = useState<any[]>([])
+  const [searchCoordinates, setSearchCoordinates] = useState<{ lat: number; lon: number } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [searched, setSearched] = useState(false)
@@ -33,12 +45,15 @@ export default function SearchPage() {
       if (!response.ok) {
         setError(data.error || 'Search failed')
         setResults([])
+        setSearchCoordinates(null)
       } else {
         setResults(data.results || [])
+        setSearchCoordinates(data.searchCoordinates || null)
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
       setResults([])
+      setSearchCoordinates(null)
     } finally {
       setLoading(false)
     }
@@ -131,75 +146,94 @@ export default function SearchPage() {
                 : 'No sharpeners found'}
             </h2>
             
-            <div className="grid gap-6">
-              {results
-                .filter(result => showAll || (result.upcomingAvailability && result.upcomingAvailability.length > 0))
-                .map((result) => (
-                <div key={result.locationId} className="card">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{result.sharpenerName}</h3>
-                      <p className="text-gray-600">{result.locationName}</p>
-                      <p className="text-sm text-gray-500">
-                        {result.city}, {result.state} {result.zipCode}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      {result.averageRating && (
-                        <div className="flex items-center">
-                          <span className="text-yellow-500 text-xl mr-1">⭐</span>
-                          <span className="text-lg font-bold">{result.averageRating.toFixed(1)}</span>
-                          <span className="text-gray-500 text-sm ml-1">({result.totalRatings})</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Machines */}
-                  {result.machines && result.machines.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-gray-700 mb-2">Machines:</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {result.machines.map((machine: any) => (
-                          <span key={machine.machineId} className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm">
-                            {machine.machineType}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Availability for Next 7 Days */}
-                  {result.upcomingAvailability && result.upcomingAvailability.length > 0 ? (
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-gray-700 mb-2">Available in the Next 7 Days:</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {result.upcomingAvailability.map((slot: any) => (
-                          <div key={slot.availabilityId} className="text-sm bg-green-50 border border-green-200 rounded px-3 py-2">
-                            <div className="font-medium text-gray-900">
-                              {new Date(slot.availableDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                            </div>
-                            <div className="text-gray-600">
-                              {slot.startTime} - {slot.endTime} • ${slot.price}
-                            </div>
+            {/* Map and Results Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Results List */}
+              <div className="space-y-6 order-2 lg:order-1">
+                {results
+                  .filter(result => showAll || (result.upcomingAvailability && result.upcomingAvailability.length > 0))
+                  .map((result) => (
+                  <div key={result.locationId} className="card">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900">{result.sharpenerName}</h3>
+                        <p className="text-gray-600">{result.locationName}</p>
+                        <p className="text-sm text-gray-500">
+                          {result.city}, {result.state} {result.zipCode}
+                        </p>
+                        {result.distance !== null && (
+                          <div className="mt-2 inline-block bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            📍 {result.distance.toFixed(1)} km away
                           </div>
-                        ))}
+                        )}
+                      </div>
+                      <div className="text-right ml-4">
+                        {result.averageRating && (
+                          <div className="flex items-center justify-end">
+                            <span className="text-yellow-500 text-xl mr-1">⭐</span>
+                            <span className="text-lg font-bold">{result.averageRating.toFixed(1)}</span>
+                            <span className="text-gray-500 text-sm ml-1">({result.totalRatings})</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500 italic">No availability in the next 7 days</p>
-                    </div>
-                  )}
 
-                  <Link
-                    href={`/sharpener/${result.sharpenerId}`}
-                    className="btn-primary inline-block"
-                  >
-                    View Profile & Book
-                  </Link>
+                    {/* Machines */}
+                    {result.machines && result.machines.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="font-semibold text-gray-700 mb-2">Machines:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {result.machines.map((machine: any) => (
+                            <span key={machine.machineId} className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm">
+                              {machine.machineType}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Availability for Next 7 Days */}
+                    {result.upcomingAvailability && result.upcomingAvailability.length > 0 ? (
+                      <div className="mb-4">
+                        <h4 className="font-semibold text-gray-700 mb-2">Available in the Next 7 Days:</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {result.upcomingAvailability.map((slot: any) => (
+                            <div key={slot.availabilityId} className="text-sm bg-green-50 border border-green-200 rounded px-3 py-2">
+                              <div className="font-medium text-gray-900">
+                                {new Date(slot.availableDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                              </div>
+                              <div className="text-gray-600">
+                                {slot.startTime} - {slot.endTime} • ${slot.price}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-500 italic">No availability in the next 7 days</p>
+                      </div>
+                    )}
+
+                    <Link
+                      href={`/sharpener/${result.sharpenerId}`}
+                      className="btn-primary inline-block"
+                    >
+                      View Profile & Book
+                    </Link>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Map */}
+              {searchCoordinates && (
+                <div className="order-1 lg:order-2 h-[400px] lg:h-auto lg:sticky lg:top-4">
+                  <MapView 
+                    searchCoordinates={searchCoordinates} 
+                    results={results.filter(r => showAll || (r.upcomingAvailability && r.upcomingAvailability.length > 0))}
+                  />
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
