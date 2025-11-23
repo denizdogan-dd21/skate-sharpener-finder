@@ -1,0 +1,796 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+
+export default function SharpenerDashboard() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [user, setUser] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState('locations')
+  const [locations, setLocations] = useState<any[]>([])
+  const [machines, setMachines] = useState<any[]>([])
+  const [availabilities, setAvailabilities] = useState<any[]>([])
+  const [appointments, setAppointments] = useState<any[]>([])
+  const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
+  const [selectedMachine, setSelectedMachine] = useState<number | null>(null)
+
+  // Location form
+  const [locationForm, setLocationForm] = useState({
+    locationName: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    zipCode: ''
+  })
+
+  // Machine form
+  const [machineForm, setMachineForm] = useState({
+    machineType: '',
+    radiusOptions: ''
+  })
+
+  // Availability form
+  const [availabilityForm, setAvailabilityForm] = useState({
+    availableDate: '',
+    startTime: '',
+    endTime: '',
+    price: ''
+  })
+
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    // Check for query parameters from email actions
+    const success = searchParams.get('success')
+    const errorParam = searchParams.get('error')
+    
+    if (success === 'accepted') {
+      setMessage('Appointment accepted successfully! The customer has been notified.')
+      setTimeout(() => setMessage(''), 5000)
+    } else if (success === 'denied') {
+      setMessage('Appointment declined. The customer has been notified.')
+      setTimeout(() => setMessage(''), 5000)
+    } else if (errorParam) {
+      setError('There was an issue processing the appointment. Please try again.')
+      setTimeout(() => setError(''), 5000)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user')
+    if (!userData) {
+      router.push('/auth/login')
+      return
+    }
+    const parsedUser = JSON.parse(userData)
+    console.log('Dashboard user data:', parsedUser)
+    if (parsedUser.accountType !== 'sharpener') {
+      router.push('/search')
+      return
+    }
+    setUser(parsedUser)
+    loadLocations(parsedUser.sharpenerId)
+    loadAppointments(parsedUser.sharpenerId)
+  }, [router])
+
+  const loadLocations = async (sharpenerId: number) => {
+    try {
+      const res = await fetch(`/api/sharpener/locations?sharpenerId=${sharpenerId}`)
+      const data = await res.json()
+      if (res.ok) {
+        setLocations(data.locations || [])
+        if (data.locations && data.locations.length > 0) {
+          setSelectedLocation(data.locations[0].locationId)
+          loadMachines(data.locations[0].locationId)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load locations')
+    }
+  }
+
+  const loadMachines = async (locationId: number) => {
+    try {
+      const res = await fetch(`/api/sharpener/machines?locationId=${locationId}`)
+      const data = await res.json()
+      if (res.ok) {
+        setMachines(data.machines || [])
+        if (data.machines && data.machines.length > 0) {
+          setSelectedMachine(data.machines[0].machineId)
+          loadAvailabilities(locationId, data.machines[0].machineId)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load machines')
+    }
+  }
+
+  const loadAvailabilities = async (locationId: number, machineId?: number) => {
+    try {
+      let url = `/api/sharpener/availability?locationId=${locationId}`
+      if (machineId) url += `&machineId=${machineId}`
+      const res = await fetch(url)
+      const data = await res.json()
+      if (res.ok) {
+        setAvailabilities(data.availabilities || [])
+      }
+    } catch (err) {
+      console.error('Failed to load availabilities')
+    }
+  }
+
+  const loadAppointments = async (sharpenerId: number) => {
+    try {
+      console.log('Loading appointments for sharpenerId:', sharpenerId)
+      const res = await fetch(`/api/appointments?sharpenerId=${sharpenerId}`)
+      const data = await res.json()
+      console.log('Appointments response:', data)
+      if (res.ok) {
+        setAppointments(data.appointments || [])
+        console.log('Set appointments:', data.appointments || [])
+      } else {
+        console.error('Failed to load appointments:', data)
+      }
+    } catch (err) {
+      console.error('Failed to load appointments:', err)
+    }
+  }
+
+  const handleAppointmentAction = async (appointmentId: number, status: string) => {
+    try {
+      const res = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, sharpenerId: user.sharpenerId })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage(`Appointment ${status.toLowerCase()} successfully!`)
+        loadAppointments(user.sharpenerId)
+      } else {
+        setError(data.error || 'Failed to update appointment')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleAddLocation = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch('/api/sharpener/locations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sharpenerId: user.sharpenerId,
+          ...locationForm
+        })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Location added successfully!')
+        setLocationForm({ locationName: '', streetAddress: '', city: '', state: '', zipCode: '' })
+        loadLocations(user.sharpenerId)
+      } else {
+        setError(data.error || 'Failed to add location')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleAddMachine = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedLocation) {
+      setError('Please select a location first')
+      return
+    }
+
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch('/api/sharpener/machines', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          locationId: selectedLocation,
+          ...machineForm
+        })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Machine added successfully!')
+        setMachineForm({ machineType: '', radiusOptions: '' })
+        loadMachines(selectedLocation)
+      } else {
+        setError(data.error || 'Failed to add machine')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleAddAvailability = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedLocation || !selectedMachine) {
+      setError('Please select a location and machine first')
+      return
+    }
+
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch('/api/sharpener/availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          locationId: selectedLocation,
+          machineId: selectedMachine,
+          ...availabilityForm
+        })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Availability added successfully!')
+        setAvailabilityForm({ availableDate: '', startTime: '', endTime: '', price: '' })
+        loadAvailabilities(selectedLocation, selectedMachine)
+      } else {
+        setError(data.error || 'Failed to add availability')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  if (!user) return null
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900">Sharpener Dashboard</h1>
+          <p className="text-gray-600 mt-2">Welcome, {user.firstName} {user.lastName}!</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('appointments')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'appointments'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Appointments
+              {appointments.filter(a => a.status === 'PENDING').length > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                  {appointments.filter(a => a.status === 'PENDING').length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('locations')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'locations'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Locations
+            </button>
+            <button
+              onClick={() => setActiveTab('machines')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'machines'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Machines
+            </button>
+            <button
+              onClick={() => setActiveTab('availability')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'availability'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Availability
+            </button>
+          </nav>
+        </div>
+
+        {/* Messages */}
+        {message && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+            {message}
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Appointments Tab */}
+        {activeTab === 'appointments' && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Appointment Requests</h2>
+            
+            {/* Pending Appointments */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Pending Requests</h3>
+              <div className="space-y-4">
+                {appointments.filter(a => a.status === 'PENDING').length === 0 ? (
+                  <p className="text-gray-500">No pending requests</p>
+                ) : (
+                  appointments.filter(a => a.status === 'PENDING').map((apt) => (
+                    <div key={apt.appointmentId} className="card bg-yellow-50 border-2 border-yellow-300">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h4 className="text-lg font-bold text-gray-900">
+                            {apt.user.firstName} {apt.user.lastName}
+                          </h4>
+                          <p className="text-gray-700">📞 {apt.user.phone}</p>
+                          <p className="text-gray-700">📧 {apt.user.email}</p>
+                        </div>
+                        <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                          PENDING
+                        </span>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <p className="text-sm text-gray-600">Date & Time</p>
+                          <p className="font-semibold text-gray-900">
+                            {new Date(apt.requestedDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-gray-900">{apt.startTime} - {apt.endTime}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Location</p>
+                          <p className="font-semibold text-gray-900">{apt.location.locationName}</p>
+                          <p className="text-sm text-gray-700">{apt.location.city}, {apt.location.state}</p>
+                        </div>
+                      </div>
+                      {apt.notes && (
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-600">Customer Notes</p>
+                          <p className="text-gray-900">{apt.notes}</p>
+                        </div>
+                      )}
+                      <div className="flex space-x-3">
+                        <button
+                          onClick={() => handleAppointmentAction(apt.appointmentId, 'CONFIRMED')}
+                          className="btn-primary flex-1"
+                        >
+                          ✓ Accept
+                        </button>
+                        <button
+                          onClick={() => handleAppointmentAction(apt.appointmentId, 'DENIED')}
+                          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200 flex-1"
+                        >
+                          ✗ Deny
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Confirmed Appointments */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Confirmed Appointments</h3>
+              <div className="space-y-4">
+                {appointments.filter(a => a.status === 'CONFIRMED').length === 0 ? (
+                  <p className="text-gray-500">No confirmed appointments</p>
+                ) : (
+                  appointments.filter(a => a.status === 'CONFIRMED').map((apt) => (
+                    <div key={apt.appointmentId} className="card bg-green-50 border-2 border-green-300">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h4 className="text-lg font-bold text-gray-900">
+                            {apt.user.firstName} {apt.user.lastName}
+                          </h4>
+                          <p className="text-gray-700">📞 {apt.user.phone}</p>
+                        </div>
+                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                          CONFIRMED
+                        </span>
+                      </div>
+                      <p className="font-semibold text-gray-900">
+                        {new Date(apt.requestedDate).toLocaleDateString()} at {apt.startTime}
+                      </p>
+                      <p className="text-sm text-gray-700">{apt.location.locationName}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Past Appointments */}
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Past Appointments</h3>
+              <div className="space-y-4">
+                {appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED'].includes(a.status)).length === 0 ? (
+                  <p className="text-gray-500">No past appointments</p>
+                ) : (
+                  appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED'].includes(a.status)).map((apt) => (
+                    <div key={apt.appointmentId} className="card bg-gray-50">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-bold text-gray-900">
+                            {apt.user.firstName} {apt.user.lastName}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {new Date(apt.requestedDate).toLocaleDateString()} at {apt.startTime}
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          apt.status === 'COMPLETED' || apt.status === 'RATED' 
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-500 text-white'
+                        }`}>
+                          {apt.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Locations Tab */}
+        {activeTab === 'locations' && (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="card">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Add New Location</h2>
+              <form onSubmit={handleAddLocation} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Location Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="input-field"
+                    placeholder="e.g., Main Shop"
+                    value={locationForm.locationName}
+                    onChange={(e) => setLocationForm({ ...locationForm, locationName: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Street Address
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="input-field"
+                    placeholder="123 Main St"
+                    value={locationForm.streetAddress}
+                    onChange={(e) => setLocationForm({ ...locationForm, streetAddress: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <input
+                      type="text"
+                      required
+                      className="input-field"
+                      placeholder="Boston"
+                      value={locationForm.city}
+                      onChange={(e) => setLocationForm({ ...locationForm, city: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                    <input
+                      type="text"
+                      required
+                      className="input-field"
+                      placeholder="MA"
+                      value={locationForm.state}
+                      onChange={(e) => setLocationForm({ ...locationForm, state: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
+                    <input
+                      type="text"
+                      required
+                      className="input-field"
+                      placeholder="02101"
+                      value={locationForm.zipCode}
+                      onChange={(e) => setLocationForm({ ...locationForm, zipCode: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="btn-primary w-full">
+                  Add Location
+                </button>
+              </form>
+            </div>
+
+            <div className="card">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Locations</h2>
+              <div className="space-y-3">
+                {locations.length === 0 ? (
+                  <p className="text-gray-500">No locations added yet</p>
+                ) : (
+                  locations.map((loc) => (
+                    <div
+                      key={loc.locationId}
+                      className={`p-4 border rounded-lg cursor-pointer transition ${
+                        selectedLocation === loc.locationId
+                          ? 'border-primary-600 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => {
+                        setSelectedLocation(loc.locationId)
+                        loadMachines(loc.locationId)
+                      }}
+                    >
+                      <h3 className="font-bold text-gray-900">{loc.locationName}</h3>
+                      <p className="text-sm text-gray-600">{loc.streetAddress}</p>
+                      <p className="text-sm text-gray-600">
+                        {loc.city}, {loc.state} {loc.zipCode}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Machines Tab */}
+        {activeTab === 'machines' && (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="card">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Add New Machine</h2>
+              {!selectedLocation ? (
+                <p className="text-gray-600">Please select a location first</p>
+              ) : (
+                <form onSubmit={handleAddMachine} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Selected Location
+                    </label>
+                    <select
+                      className="input-field"
+                      value={selectedLocation || ''}
+                      onChange={(e) => {
+                        const locId = parseInt(e.target.value)
+                        setSelectedLocation(locId)
+                        loadMachines(locId)
+                      }}
+                    >
+                      {locations.map((loc) => (
+                        <option key={loc.locationId} value={loc.locationId}>
+                          {loc.locationName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Machine Type
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="input-field"
+                      placeholder="e.g., Blademaster, Sparx"
+                      value={machineForm.machineType}
+                      onChange={(e) => setMachineForm({ ...machineForm, machineType: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Radius Options (comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="input-field"
+                      placeholder="1/2, 5/8, 3/4, 7/8, 1"
+                      value={machineForm.radiusOptions}
+                      onChange={(e) => setMachineForm({ ...machineForm, radiusOptions: e.target.value })}
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary w-full">
+                    Add Machine
+                  </button>
+                </form>
+              )}
+            </div>
+
+            <div className="card">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Machines</h2>
+              <div className="space-y-3">
+                {machines.length === 0 ? (
+                  <p className="text-gray-500">No machines added yet</p>
+                ) : (
+                  machines.map((machine) => (
+                    <div
+                      key={machine.machineId}
+                      className={`p-4 border rounded-lg cursor-pointer transition ${
+                        selectedMachine === machine.machineId
+                          ? 'border-primary-600 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setSelectedMachine(machine.machineId)}
+                    >
+                      <h3 className="font-bold text-gray-900">{machine.machineType}</h3>
+                      <p className="text-sm text-gray-600">Radius: {machine.radiusOptions}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Availability Tab */}
+        {activeTab === 'availability' && (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="card">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Add Availability</h2>
+              {!selectedLocation || !selectedMachine ? (
+                <p className="text-gray-600">Please select a location and machine first</p>
+              ) : (
+                <form onSubmit={handleAddAvailability} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Location
+                    </label>
+                    <select
+                      className="input-field"
+                      value={selectedLocation || ''}
+                      onChange={(e) => {
+                        const locId = parseInt(e.target.value)
+                        setSelectedLocation(locId)
+                        loadMachines(locId)
+                      }}
+                    >
+                      {locations.map((loc) => (
+                        <option key={loc.locationId} value={loc.locationId}>
+                          {loc.locationName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Machine
+                    </label>
+                    <select
+                      className="input-field"
+                      value={selectedMachine || ''}
+                      onChange={(e) => setSelectedMachine(parseInt(e.target.value))}
+                    >
+                      {machines.map((machine) => (
+                        <option key={machine.machineId} value={machine.machineId}>
+                          {machine.machineType}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      className="input-field"
+                      value={availabilityForm.availableDate}
+                      onChange={(e) => setAvailabilityForm({ ...availabilityForm, availableDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Start Time
+                      </label>
+                      <input
+                        type="time"
+                        required
+                        className="input-field"
+                        value={availabilityForm.startTime}
+                        onChange={(e) => setAvailabilityForm({ ...availabilityForm, startTime: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        End Time
+                      </label>
+                      <input
+                        type="time"
+                        required
+                        className="input-field"
+                        value={availabilityForm.endTime}
+                        onChange={(e) => setAvailabilityForm({ ...availabilityForm, endTime: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Price ($)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      className="input-field"
+                      placeholder="15.00"
+                      value={availabilityForm.price}
+                      onChange={(e) => setAvailabilityForm({ ...availabilityForm, price: e.target.value })}
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary w-full">
+                    Add Availability
+                  </button>
+                </form>
+              )}
+            </div>
+
+            <div className="card">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Availabilities</h2>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {availabilities.length === 0 ? (
+                  <p className="text-gray-500">No availabilities added yet</p>
+                ) : (
+                  availabilities.map((avail) => (
+                    <div
+                      key={avail.availabilityId}
+                      className={`p-3 border rounded-lg ${
+                        avail.isBooked ? 'border-gray-300 bg-gray-100' : 'border-green-300 bg-green-50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            {new Date(avail.availableDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {avail.startTime} - {avail.endTime}
+                          </p>
+                          <p className="text-sm text-gray-600">{avail.machine.machineType}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-primary-600">${avail.price}</p>
+                          {avail.isBooked && (
+                            <span className="text-xs bg-gray-200 px-2 py-1 rounded">Booked</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
