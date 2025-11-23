@@ -227,7 +227,7 @@ export default function SharpenerProfilePage() {
                 {/* Availabilities */}
                 {location.availabilities.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">Available Times:</h4>
+                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">Available Times (Next 7 Days):</h4>
                     <div className="space-y-2">
                       {location.availabilities.map((avail: any) => (
                         <div
