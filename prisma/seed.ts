@@ -176,12 +176,6 @@ async function main() {
     }
   })
 
-  // Mark first availability as booked
-  await prisma.availability.update({
-    where: { availabilityId: availabilities[0].availabilityId },
-    data: { isBooked: true }
-  })
-
   // Create a rating for the confirmed appointment
   const rating1 = await prisma.rating.create({
     data: {
