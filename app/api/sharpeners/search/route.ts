@@ -17,14 +17,30 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 // Geocode address using OpenStreetMap Nominatim API
 async function geocodeAddress(city?: string, state?: string, zipCode?: string, country: string = 'Germany'): Promise<{ lat: number; lon: number } | null> {
   try {
-    const parts = []
-    if (city) parts.push(city)
-    if (state) parts.push(state)
-    if (zipCode) parts.push(zipCode)
-    parts.push(country)
+    let url: string
     
-    const query = parts.join(', ')
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+    // If zipCode is provided, prioritize it with structured query
+    if (zipCode) {
+      const params = new URLSearchParams({
+        postalcode: zipCode,
+        format: 'json',
+        limit: '1'
+      })
+      if (city) params.append('city', city)
+      if (state) params.append('state', state)
+      params.append('country', country)
+      
+      url = `https://nominatim.openstreetmap.org/search?${params.toString()}`
+    } else {
+      // Fallback to regular query if no zipCode
+      const parts = []
+      if (city) parts.push(city)
+      if (state) parts.push(state)
+      parts.push(country)
+      
+      const query = parts.join(', ')
+      url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+    }
     
     const response = await fetch(url, {
       headers: {
