@@ -3,12 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import type { RegisterFormData } from '@/types'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
+    confirmPassword: '',
     firstName: '',
     lastName: '',
     phone: '',
@@ -38,8 +41,26 @@ export default function RegisterPage() {
         return
       }
 
-      // Redirect to login page
-      router.push('/auth/login')
+      // Auto-login after successful registration
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        accountType: formData.accountType,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        // Registration succeeded but login failed, redirect to login page
+        router.push('/auth/login')
+      } else {
+        // Redirect based on account type
+        if (formData.accountType === 'sharpener') {
+          router.push('/dashboard')
+        } else {
+          router.push('/search')
+        }
+        router.refresh()
+      }
     } catch (err) {
       setError('An error occurred. Please try again.')
       setLoading(false)
@@ -78,7 +99,7 @@ export default function RegisterPage() {
                     name="accountType"
                     value="user"
                     checked={formData.accountType === 'user'}
-                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
                   <span className="text-gray-900">Customer</span>
@@ -89,7 +110,7 @@ export default function RegisterPage() {
                     name="accountType"
                     value="sharpener"
                     checked={formData.accountType === 'sharpener'}
-                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
                   <span className="text-gray-900">Sharpener</span>

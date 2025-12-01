@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import type { SearchResult, SearchCoordinates } from '@/types'
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -33,21 +34,8 @@ const sharpenerIcon = new L.Icon({
 })
 
 interface MapViewProps {
-  searchCoordinates: { lat: number; lon: number }
-  results: Array<{
-    sharpenerId: number
-    sharpenerName: string
-    locationId: number
-    locationName: string
-    city: string
-    state: string
-    zipCode: string
-    latitude: number | null
-    longitude: number | null
-    distance: number | null
-    averageRating: number | null
-    upcomingAvailability: any[]
-  }>
+  searchCoordinates: SearchCoordinates
+  results: SearchResult[]
 }
 
 function MapBounds({ searchCoordinates, results }: MapViewProps) {

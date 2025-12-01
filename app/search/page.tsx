@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import type { SearchResult, SearchCoordinates } from '@/types'
 
 // Dynamically import MapView to avoid SSR issues with Leaflet
 const MapView = dynamic(() => import('./MapView'), {
@@ -20,8 +21,8 @@ export default function SearchPage() {
     state: 'Bayern',
     zipCode: ''
   })
-  const [results, setResults] = useState<any[]>([])
-  const [searchCoordinates, setSearchCoordinates] = useState<{ lat: number; lon: number } | null>(null)
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [searchCoordinates, setSearchCoordinates] = useState<SearchCoordinates | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [searched, setSearched] = useState(false)
