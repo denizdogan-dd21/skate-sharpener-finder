@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import type { Appointment } from '@/types'
 
 export default function UserAppointmentsPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
+  const t = useTranslations()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -120,8 +122,8 @@ export default function UserAppointmentsPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-gray-900">My Appointments</h1>
-          <p className="text-gray-600 mt-2">Welcome back, {session?.user?.firstName}!</p>
+          <h1 className="text-4xl font-bold text-gray-900">{t('appointments.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('dashboard.welcome')}, {session?.user?.firstName}!</p>
         </div>
 
         {/* Messages */}
@@ -142,9 +144,9 @@ export default function UserAppointmentsPage() {
           <div className="space-y-4">
             {activeAppointments.length === 0 ? (
               <div className="card">
-                <p className="text-gray-500">No active appointments</p>
+                <p className="text-gray-500">{t('appointments.noAppointments')}</p>
                 <Link href="/search" className="btn-primary inline-block mt-4">
-                  Find a Sharpener
+                  {t('home.hero.searchButton')}
                 </Link>
               </div>
             ) : (
@@ -176,7 +178,7 @@ export default function UserAppointmentsPage() {
                       <p className="text-gray-900">{apt.startTime} - {apt.endTime}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Location</p>
+                      <p className="text-sm text-gray-600">{t('appointments.location')}</p>
                       <p className="font-semibold text-gray-900">{apt.location?.locationName}</p>
                       {apt.status === 'CONFIRMED' && apt.location?.streetAddress ? (
                         <>
@@ -195,14 +197,14 @@ export default function UserAppointmentsPage() {
 
                   {apt.machine && (
                     <div className="mb-4">
-                      <p className="text-sm text-gray-600">Machine</p>
+                      <p className="text-sm text-gray-600">{t('appointments.machine')}</p>
                       <p className="text-gray-900">{apt.machine?.machineType}</p>
                     </div>
                   )}
 
                   {apt.notes && (
                     <div className="mb-4">
-                      <p className="text-sm text-gray-600">Your Notes</p>
+                      <p className="text-sm text-gray-600">{t('appointments.notes')}</p>
                       <p className="text-gray-900">{apt.notes}</p>
                     </div>
                   )}
@@ -228,7 +230,7 @@ export default function UserAppointmentsPage() {
                       onClick={() => handleCancelAppointment(apt.appointmentId)}
                       className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
                     >
-                      Cancel Appointment
+                      {t('appointments.cancelButton')}
                     </button>
                   </div>
                 </div>
