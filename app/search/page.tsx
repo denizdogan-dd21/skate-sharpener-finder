@@ -198,7 +198,7 @@ export default function SearchPage() {
                     {/* Availability for Next 14 Days */}
                     {result.upcomingAvailability && result.upcomingAvailability.length > 0 ? (
                       <div className="mb-4">
-                        <h4 className="font-semibold text-gray-700 mb-2">Available in the Next 14 Days:</h4>
+                        <h4 className="font-semibold text-gray-700 mb-2">{t('search.available14Days')}</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {result.upcomingAvailability.map((slot: any) => (
                             <div key={slot.availabilityId} className="text-sm bg-green-50 border border-green-200 rounded px-3 py-2">
