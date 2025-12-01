@@ -4,10 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import type { LoginFormData } from '@/types'
 
 export default function LoginPage() {
   const router = useRouter()
+  const t = useTranslations()
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -52,11 +54,11 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900">{t('auth.login.title')}</h2>
           <p className="mt-2 text-gray-600">
-            Or{' '}
+            {t('auth.login.or')}{' '}
             <Link href="/auth/register" className="text-primary-600 hover:text-primary-700 font-medium">
-              create a new account
+              {t('auth.login.createAccount')}
             </Link>
           </p>
         </div>
@@ -71,7 +73,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Account Type
+                {t('auth.login.accountType')}
               </label>
               <div className="flex space-x-4">
                 <label className="flex items-center">
@@ -83,7 +85,7 @@ export default function LoginPage() {
                     onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
-                  <span className="text-gray-900">Customer</span>
+                  <span className="text-gray-900">{t('auth.login.customer')}</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -94,14 +96,14 @@ export default function LoginPage() {
                     onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
-                  <span className="text-gray-900">Sharpener</span>
+                  <span className="text-gray-900">{t('auth.login.sharpener')}</span>
                 </label>
               </div>
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
+                {t('auth.login.email')}
               </label>
               <input
                 id="email"
@@ -115,7 +117,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                {t('auth.login.password')}
               </label>
               <input
                 id="password"
@@ -132,7 +134,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? t('auth.login.submitting') : t('auth.login.submitButton')}
             </button>
           </form>
         </div>

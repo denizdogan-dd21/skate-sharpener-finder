@@ -7,7 +7,10 @@ import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import AuthProvider from './providers'
+import IntlProvider from './IntlProvider'
+import LanguageToggle from '@/components/LanguageToggle'
 import type { User, Sharpener } from '@/types'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -17,6 +20,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const t = useTranslations()
 
   const user = session?.user
 
@@ -44,13 +48,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     height={32}
                     className="mr-1 sm:mr-2 rounded object-cover"
                   />
-                  <span className="hidden sm:inline">Skate Sharpener Finder</span>
-                  <span className="sm:hidden">SSF</span>
+                  <span className="hidden sm:inline">{t('app.name')}</span>
+                  <span className="sm:hidden">SSC</span>
                 </Link>
               </div>
               
               {/* Mobile menu button */}
-              <div className="flex items-center md:hidden">
+              <div className="flex items-center md:hidden gap-2">
+                <LanguageToggle />
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="text-gray-700 hover:text-primary-600 p-2"
@@ -68,18 +73,18 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               {/* Desktop menu */}
               <div className="hidden md:flex items-center space-x-4">
                 <Link href="/search" className="text-gray-700 hover:text-primary-600 font-medium">
-                  Search Sharpeners
+                  {t('nav.search')}
                 </Link>
                 {user ? (
                   <>
                     {user.accountType === 'user' && (
                       <Link href="/appointments" className="text-gray-700 hover:text-primary-600 font-medium">
-                        My Appointments
+                        {t('nav.appointments')}
                       </Link>
                     )}
                     {user.accountType === 'sharpener' && (
                       <Link href="/dashboard" className="text-gray-700 hover:text-primary-600 font-medium">
-                        Dashboard
+                        {t('nav.dashboard')}
                       </Link>
                     )}
                     <span className="text-gray-600">
@@ -89,19 +94,20 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                       onClick={handleSignOut}
                       className="text-gray-700 hover:text-red-600 font-medium"
                     >
-                      Sign Out
+                      {t('nav.logout')}
                     </button>
                   </>
                 ) : (
                   <>
                     <Link href="/auth/login" className="text-gray-700 hover:text-primary-600 font-medium">
-                      Login
+                      {t('nav.login')}
                     </Link>
                     <Link href="/auth/register" className="btn-primary">
-                      Sign Up
+                      {t('nav.register')}
                     </Link>
                   </>
                 )}
+                <LanguageToggle />
               </div>
             </div>
             
@@ -114,7 +120,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     className="text-gray-700 hover:text-primary-600 font-medium px-4 py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Search Sharpeners
+                    {t('nav.search')}
                   </Link>
                   {user ? (
                     <>
@@ -124,7 +130,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                           className="text-gray-700 hover:text-primary-600 font-medium px-4 py-2"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          My Appointments
+                          {t('nav.appointments')}
                         </Link>
                       )}
                       {user.accountType === 'sharpener' && (
@@ -133,7 +139,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                           className="text-gray-700 hover:text-primary-600 font-medium px-4 py-2"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          Dashboard
+                          {t('nav.dashboard')}
                         </Link>
                       )}
                       <div className="text-gray-600 px-4 py-2">
@@ -146,7 +152,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                         }}
                         className="text-left text-gray-700 hover:text-red-600 font-medium px-4 py-2"
                       >
-                        Sign Out
+                        {t('nav.logout')}
                       </button>
                     </>
                   ) : (
@@ -156,14 +162,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                         className="text-gray-700 hover:text-primary-600 font-medium px-4 py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Login
+                        {t('nav.login')}
                       </Link>
                       <Link 
                         href="/auth/register" 
                         className="btn-primary mx-4"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Sign Up
+                        {t('nav.register')}
                       </Link>
                     </>
                   )}
@@ -179,7 +185,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         
         <footer className="bg-gray-800 text-white py-8 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p>&copy; 2025 Skate Sharpener Finder. All rights reserved.</p>
+            <p>&copy; 2025 {t('app.name')}. All rights reserved.</p>
           </div>
         </footer>
       </body>
@@ -199,7 +205,9 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <LayoutContent>{children}</LayoutContent>
+          <IntlProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </IntlProvider>
         </AuthProvider>
       </body>
     </html>
