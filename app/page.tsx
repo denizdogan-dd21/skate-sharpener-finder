@@ -35,6 +35,9 @@ export default function Home() {
             <Link href="/search" className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto">
               {t('home.hero.searchButton')}
             </Link>
+            <Link href="/auth/login" className="btn-secondary text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto">
+              {t('nav.login')}
+            </Link>
             <Link href="/auth/register" className="btn-secondary text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto">
               {t('home.hero.joinButton')}
             </Link>
