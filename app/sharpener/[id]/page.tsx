@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import type { Sharpener, SharpenerLocation, SharpeningMachine, Availability } from '@/types'
 
 interface SharpenerWithDetails extends Sharpener {
@@ -17,6 +18,7 @@ export default function SharpenerProfilePage() {
   const params = useParams()
   const router = useRouter()
   const { data: session } = useSession()
+  const t = useTranslations()
   const [sharpener, setSharpener] = useState<SharpenerWithDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -162,7 +164,7 @@ export default function SharpenerProfilePage() {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -186,7 +188,7 @@ export default function SharpenerProfilePage() {
         {/* Success Message */}
         {bookingSuccess && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-            Appointment request sent successfully! The sharpener will review your request.
+            {t('booking.success')}
           </div>
         )}
 
@@ -207,7 +209,7 @@ export default function SharpenerProfilePage() {
                   <span className="text-yellow-500 text-xl sm:text-2xl mr-2">⭐</span>
                   <span className="text-xl sm:text-2xl font-bold">{sharpener.averageRating.toFixed(1)}</span>
                 </div>
-                <p className="text-gray-500 text-xs sm:text-sm">{sharpener.totalRatings} reviews</p>
+                <p className="text-gray-500 text-xs sm:text-sm">{sharpener.totalRatings} {t('search.reviews')}</p>
               </div>
             )}
           </div>
@@ -215,7 +217,7 @@ export default function SharpenerProfilePage() {
 
         {/* Locations */}
         <div className="mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Locations</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{t('sharpener.locations')}</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-2 gap-4 sm:gap-6">
             {sharpener.locations.map((location: any) => (
               <div key={location.locationId} className="card">
@@ -225,12 +227,12 @@ export default function SharpenerProfilePage() {
                 {/* Machines */}
                 {location.machines.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">Machines:</h4>
+                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">{t('sharpener.machines')}:</h4>
                     <div className="space-y-2">
                       {location.machines.map((machine: any) => (
                         <div key={machine.machineId} className="bg-gray-50 p-2 sm:p-3 rounded">
                           <p className="text-sm sm:text-base font-medium text-gray-900">{machine.machineType}</p>
-                          <p className="text-xs sm:text-sm text-gray-600">Radius options: {machine.radiusOptions}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{t('sharpener.radiusOptions')}: {machine.radiusOptions}</p>
                         </div>
                       ))}
                     </div>
@@ -240,7 +242,7 @@ export default function SharpenerProfilePage() {
                 {/* Availabilities */}
                 {location.availabilities.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">Available Times (Next 14 Days):</h4>
+                    <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">{t('sharpener.availability')} ({t('search.results')}):</h4>
                     <div className="space-y-2">
                       {location.availabilities.map((avail: any) => (
                         <div
@@ -292,16 +294,16 @@ export default function SharpenerProfilePage() {
         {/* Booking Form */}
         {selectedAvailability && (
           <div className="card mb-6 bg-primary-50 border-2 border-primary-600">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Request Appointment</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">{t('booking.title')}</h3>
             <div className="bg-white p-3 sm:p-4 rounded-lg mb-4">
               <p className="text-sm sm:text-base text-gray-900">
-                <strong>Date:</strong> {new Date(selectedAvailability.availableDate).toLocaleDateString()}
+                <strong>{t('sharpener.date')}:</strong> {new Date(selectedAvailability.availableDate).toLocaleDateString()}
               </p>
               <p className="text-sm sm:text-base text-gray-900">
-                <strong>Time:</strong> {selectedAvailability.startTime} - {selectedAvailability.endTime}
+                <strong>{t('sharpener.time')}:</strong> {selectedAvailability.startTime} - {selectedAvailability.endTime}
               </p>
               <p className="text-sm sm:text-base text-gray-900">
-                <strong>Price:</strong> ${selectedAvailability.price}
+                <strong>{t('sharpener.price')}:</strong> ${selectedAvailability.price}
               </p>
             </div>
             <div className="mb-4">
@@ -366,12 +368,12 @@ export default function SharpenerProfilePage() {
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Notes (optional)
+                {t('booking.notes')}
               </label>
               <textarea
                 className="input-field"
                 rows={3}
-                placeholder="Any special requests or preferred radius..."
+                placeholder={t('booking.notesPlaceholder')}
                 value={bookingNotes}
                 onChange={(e) => setBookingNotes(e.target.value)}
               />
@@ -381,7 +383,7 @@ export default function SharpenerProfilePage() {
                 onClick={handleBooking}
                 className="btn-primary flex-1 w-full sm:w-auto"
               >
-                Confirm Booking Request
+                {t('booking.submitButton')}
               </button>
               <button
                 onClick={() => {
@@ -390,7 +392,7 @@ export default function SharpenerProfilePage() {
                 }}
                 className="btn-secondary w-full sm:w-auto"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -399,7 +401,7 @@ export default function SharpenerProfilePage() {
         {/* Reviews */}
         {sharpener.ratings && sharpener.ratings.length > 0 && (
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Recent Reviews</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{t('sharpener.ratings')}</h2>
             <div className="space-y-4">
               {sharpener.ratings.map((review: any) => (
                 <div key={review.ratingId} className="card">

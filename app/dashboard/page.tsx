@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import type { 
   SharpenerLocation, 
   SharpeningMachine, 
@@ -17,6 +18,7 @@ export default function SharpenerDashboard() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
+  const t = useTranslations()
   const [activeTab, setActiveTab] = useState('locations')
   const [locations, setLocations] = useState<SharpenerLocation[]>([])
   const [machines, setMachines] = useState<SharpeningMachine[]>([])
@@ -508,15 +510,15 @@ export default function SharpenerDashboard() {
     setAvailabilityForm({ availableDate: '', startTime: '', endTime: '', price: '', repeatWeeks: '1' })
   }
 
-  if (status === 'loading') return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>
+  if (status === 'loading') return <div className="min-h-screen flex items-center justify-center"><p>{t('common.loading')}</p></div>
   if (!session?.user) return null
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">Sharpener Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome, {session?.user?.firstName} {session?.user?.lastName}!</p>
+          <h1 className="text-4xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('dashboard.welcome')}, {session?.user?.firstName} {session?.user?.lastName}!</p>
         </div>
 
         {/* Tabs */}
@@ -530,7 +532,7 @@ export default function SharpenerDashboard() {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              Appointments
+              {t('dashboard.tabs.appointments')}
               {appointments.filter(a => a.status === 'PENDING').length > 0 && (
                 <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                   {appointments.filter(a => a.status === 'PENDING').length}
@@ -545,7 +547,7 @@ export default function SharpenerDashboard() {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              Locations
+              {t('dashboard.tabs.locations')}
             </button>
             <button
               onClick={() => setActiveTab('machines')}
@@ -555,7 +557,7 @@ export default function SharpenerDashboard() {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              Machines
+              {t('dashboard.tabs.machines')}
             </button>
             <button
               onClick={() => setActiveTab('availability')}
@@ -565,7 +567,7 @@ export default function SharpenerDashboard() {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              Availability
+              {t('dashboard.tabs.availability')}
             </button>
           </nav>
         </div>
@@ -585,14 +587,14 @@ export default function SharpenerDashboard() {
         {/* Appointments Tab */}
         {activeTab === 'appointments' && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Appointment Requests</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('dashboard.appointments.title')}</h2>
             
             {/* Pending Appointments */}
             <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Pending Requests</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t('appointments.status')}</h3>
               <div className="space-y-4">
                 {appointments.filter(a => a.status === 'PENDING').length === 0 ? (
-                  <p className="text-gray-500">No pending requests</p>
+                  <p className="text-gray-500">{t('dashboard.appointments.none')}</p>
                 ) : (
                   appointments.filter(a => a.status === 'PENDING').map((apt) => (
                     <div key={apt.appointmentId} className="card bg-yellow-50 border-2 border-yellow-300">
@@ -610,21 +612,21 @@ export default function SharpenerDashboard() {
                       </div>
                       <div className="grid md:grid-cols-2 gap-4 mb-4">
                         <div>
-                          <p className="text-sm text-gray-600">Date & Time</p>
+                          <p className="text-sm text-gray-600">{t('appointments.date')}</p>
                           <p className="font-semibold text-gray-900">
                             {new Date(apt.requestedDate).toLocaleDateString()}
                           </p>
                           <p className="text-gray-900">{apt.startTime} - {apt.endTime}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-600">Location</p>
+                          <p className="text-sm text-gray-600">{t('appointments.location')}</p>
                           <p className="font-semibold text-gray-900">{apt.location?.locationName}</p>
                           <p className="text-sm text-gray-700">{apt.location?.city}, {apt.location?.state}</p>
                         </div>
                       </div>
                       {apt.notes && (
                         <div className="mb-4">
-                          <p className="text-sm text-gray-600">Customer Notes</p>
+                          <p className="text-sm text-gray-600">{t('dashboard.appointments.notes')}</p>
                           <p className="text-gray-900">{apt.notes}</p>
                         </div>
                       )}
@@ -633,13 +635,13 @@ export default function SharpenerDashboard() {
                           onClick={() => handleAppointmentAction(apt.appointmentId, 'CONFIRMED')}
                           className="btn-primary flex-1"
                         >
-                          ✓ Accept
+                          ✓ {t('dashboard.appointments.acceptButton')}
                         </button>
                         <button
                           onClick={() => handleAppointmentAction(apt.appointmentId, 'DENIED')}
                           className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200 flex-1"
                         >
-                          ✗ Deny
+                          ✗ {t('dashboard.appointments.denyButton')}
                         </button>
                       </div>
                     </div>
@@ -717,25 +719,25 @@ export default function SharpenerDashboard() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                {editingLocation ? 'Edit Location' : 'Add New Location'}
+                {editingLocation ? t('dashboard.locations.edit') : t('dashboard.locations.add')}
               </h2>
               <form onSubmit={editingLocation ? handleUpdateLocation : handleAddLocation} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location Name
+                    {t('dashboard.locations.name')}
                   </label>
                   <input
                     type="text"
                     required
                     className="input-field"
-                    placeholder="e.g., Main Shop"
+                    placeholder={t('dashboard.locations.namePlaceholder')}
                     value={locationForm.locationName}
                     onChange={(e) => setLocationForm({ ...locationForm, locationName: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Street Address
+                    {t('dashboard.locations.street')}
                   </label>
                   <input
                     type="text"
@@ -748,7 +750,7 @@ export default function SharpenerDashboard() {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('dashboard.locations.city')}</label>
                     <input
                       type="text"
                       required
@@ -759,7 +761,7 @@ export default function SharpenerDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('dashboard.locations.state')}</label>
                     <input
                       type="text"
                       required
@@ -770,7 +772,7 @@ export default function SharpenerDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('dashboard.locations.zip')}</label>
                     <input
                       type="text"
                       required
@@ -783,7 +785,7 @@ export default function SharpenerDashboard() {
                 </div>
                 <div className="flex gap-2">
                   <button type="submit" className="btn-primary flex-1">
-                    {editingLocation ? 'Update Location' : 'Add Location'}
+                    {editingLocation ? t('dashboard.locations.updateButton') : t('dashboard.locations.addButton')}
                   </button>
                   {editingLocation && (
                     <button 
@@ -791,7 +793,7 @@ export default function SharpenerDashboard() {
                       onClick={cancelEditLocation}
                       className="btn-secondary flex-1"
                     >
-                      Cancel
+                      {t('dashboard.locations.cancelButton')}
                     </button>
                   )}
                 </div>
@@ -799,10 +801,10 @@ export default function SharpenerDashboard() {
             </div>
 
             <div className="card">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Locations</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('dashboard.locations.your')}</h2>
               <div className="space-y-3">
                 {locations.length === 0 ? (
-                  <p className="text-gray-500">No locations added yet</p>
+                  <p className="text-gray-500">{t('dashboard.locations.none')}</p>
                 ) : (
                   locations.map((loc) => (
                     <div
@@ -834,7 +836,7 @@ export default function SharpenerDashboard() {
                           }}
                           className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded transition flex-1"
                         >
-                          ✏️ Edit
+                          ✏️ {t('dashboard.locations.editButton')}
                         </button>
                         <button
                           onClick={(e) => {
@@ -843,7 +845,7 @@ export default function SharpenerDashboard() {
                           }}
                           className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded transition flex-1"
                         >
-                          🗑️ Delete
+                          🗑️ {t('dashboard.locations.deleteButton')}
                         </button>
                       </div>
                     </div>
@@ -859,15 +861,15 @@ export default function SharpenerDashboard() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                {editingMachine ? 'Edit Machine' : 'Add New Machine'}
+                {editingMachine ? t('dashboard.machines.edit') : t('dashboard.machines.add')}
               </h2>
               {!selectedLocation ? (
-                <p className="text-gray-600">Please select a location first</p>
+                <p className="text-gray-600">{t('dashboard.machines.selectLocation')}</p>
               ) : (
                 <form onSubmit={editingMachine ? handleUpdateMachine : handleAddMachine} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Selected Location
+                      {t('dashboard.machines.location')}
                     </label>
                     <select
                       className="input-field"
@@ -887,33 +889,33 @@ export default function SharpenerDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Machine Type
+                      {t('dashboard.machines.type')}
                     </label>
                     <input
                       type="text"
                       required
                       className="input-field"
-                      placeholder="e.g., Blademaster, Sparx"
+                      placeholder={t('dashboard.machines.typePlaceholder')}
                       value={machineForm.machineType}
                       onChange={(e) => setMachineForm({ ...machineForm, machineType: e.target.value })}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Radius Options (comma-separated)
+                      {t('dashboard.machines.radius')}
                     </label>
                     <input
                       type="text"
                       required
                       className="input-field"
-                      placeholder="1/2, 5/8, 3/4, 7/8, 1"
+                      placeholder={t('dashboard.machines.radiusPlaceholder')}
                       value={machineForm.radiusOptions}
                       onChange={(e) => setMachineForm({ ...machineForm, radiusOptions: e.target.value })}
                     />
                   </div>
                   <div className="flex gap-2">
                     <button type="submit" className="btn-primary flex-1">
-                      {editingMachine ? 'Update Machine' : 'Add Machine'}
+                      {editingMachine ? t('dashboard.machines.updateButton') : t('dashboard.machines.addButton')}
                     </button>
                     {editingMachine && (
                       <button 
@@ -921,7 +923,7 @@ export default function SharpenerDashboard() {
                         onClick={cancelEditMachine}
                         className="btn-secondary flex-1"
                       >
-                        Cancel
+                        {t('dashboard.machines.cancelButton')}
                       </button>
                     )}
                   </div>
@@ -930,10 +932,10 @@ export default function SharpenerDashboard() {
             </div>
 
             <div className="card">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Machines</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('dashboard.machines.your')}</h2>
               <div className="space-y-3">
                 {machines.length === 0 ? (
-                  <p className="text-gray-500">No machines added yet</p>
+                  <p className="text-gray-500">{t('dashboard.machines.none')}</p>
                 ) : (
                   machines.map((machine) => (
                     <div
@@ -949,7 +951,7 @@ export default function SharpenerDashboard() {
                         onClick={() => setSelectedMachine(machine.machineId)}
                       >
                         <h3 className="font-bold text-gray-900">{machine.machineType}</h3>
-                        <p className="text-sm text-gray-600">Radius: {machine.radiusOptions}</p>
+                        <p className="text-sm text-gray-600">{t('dashboard.machines.radiusLabel')}: {machine.radiusOptions}</p>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <button
@@ -959,7 +961,7 @@ export default function SharpenerDashboard() {
                           }}
                           className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                         >
-                          Edit
+                          {t('dashboard.machines.editButton')}
                         </button>
                         <button
                           onClick={(e) => {
@@ -968,7 +970,7 @@ export default function SharpenerDashboard() {
                           }}
                           className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition"
                         >
-                          Delete
+                          {t('dashboard.machines.deleteButton')}
                         </button>
                       </div>
                     </div>
@@ -984,15 +986,15 @@ export default function SharpenerDashboard() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                {editingAvailability ? 'Edit Availability' : 'Add Availability'}
+                {editingAvailability ? 'Edit Availability' : t('dashboard.availability.add')}
               </h2>
               {!selectedLocation || !selectedMachine ? (
-                <p className="text-gray-600">Please select a location and machine first</p>
+                <p className="text-gray-600">{t('dashboard.availability.selectMachine')}</p>
               ) : (
                 <form onSubmit={editingAvailability ? handleEditAvailability : handleAddAvailability} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Location
+                      {t('dashboard.availability.location')}
                     </label>
                     <select
                       className="input-field"
@@ -1014,7 +1016,7 @@ export default function SharpenerDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Machine
+                      {t('dashboard.availability.machine')}
                     </label>
                     <select
                       className="input-field"
@@ -1034,7 +1036,7 @@ export default function SharpenerDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date
+                      {t('dashboard.availability.date')}
                     </label>
                     <input
                       type="date"
@@ -1047,7 +1049,7 @@ export default function SharpenerDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Start Time
+                        {t('dashboard.availability.startTime')}
                       </label>
                       <input
                         type="time"
@@ -1059,7 +1061,7 @@ export default function SharpenerDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        End Time
+                        {t('dashboard.availability.endTime')}
                       </label>
                       <input
                         type="time"
@@ -1072,7 +1074,7 @@ export default function SharpenerDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price ($)
+                      {t('dashboard.availability.price')}
                     </label>
                     <input
                       type="number"
@@ -1106,7 +1108,7 @@ export default function SharpenerDashboard() {
                   )}
                   <div className="flex gap-3">
                     <button type="submit" className="btn-primary flex-1">
-                      {editingAvailability ? 'Update Availability' : 'Add Availability'}
+                      {editingAvailability ? 'Update Availability' : t('dashboard.availability.addButton')}
                     </button>
                     {editingAvailability && (
                       <button 
@@ -1123,10 +1125,10 @@ export default function SharpenerDashboard() {
             </div>
 
             <div className="card">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Availabilities</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('dashboard.availability.your')}</h2>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {availabilities.length === 0 ? (
-                  <p className="text-gray-500">No availabilities added yet</p>
+                  <p className="text-gray-500">{t('dashboard.availability.none')}</p>
                 ) : (
                   availabilities.map((avail) => (
                     <div
@@ -1157,13 +1159,13 @@ export default function SharpenerDashboard() {
                           onClick={() => startEditAvailability(avail)}
                             className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition flex-1"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDeleteAvailability(avail.availabilityId)}
                             className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition flex-1"
                           >
-                            Delete
+                            {t('dashboard.availability.deleteButton')}
                           </button>
                         </div>
                     </div>
