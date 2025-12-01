@@ -24,6 +24,8 @@ export default function SharpenerDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
   const [selectedMachine, setSelectedMachine] = useState<number | null>(null)
+  const [editingLocation, setEditingLocation] = useState<number | null>(null)
+  const [editingMachine, setEditingMachine] = useState<number | null>(null)
 
   // Location form
   const [locationForm, setLocationForm] = useState<LocationFormData>({
@@ -193,6 +195,84 @@ export default function SharpenerDashboard() {
     }
   }
 
+  const handleUpdateLocation = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!session?.user || !editingLocation) return
+    
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch(`/api/sharpener/locations/${editingLocation}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sharpenerId: session.user.id,
+          ...locationForm
+        })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Location updated successfully!')
+        setEditingLocation(null)
+        setLocationForm({ locationName: '', streetAddress: '', city: 'Munich', state: 'Bayern', zipCode: '' })
+        loadLocations(session.user.id)
+      } else {
+        setError(data.error || 'Failed to update location')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleDeleteLocation = async (locationId: number) => {
+    if (!session?.user) return
+    
+    if (!confirm('Are you sure you want to delete this location? This will also delete all associated machines, availabilities, and appointments.')) {
+      return
+    }
+
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch(`/api/sharpener/locations/${locationId}?sharpenerId=${session.user.id}`, {
+        method: 'DELETE'
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Location deleted successfully!')
+        if (selectedLocation === locationId) {
+          setSelectedLocation(null)
+          setMachines([])
+        }
+        loadLocations(session.user.id)
+      } else {
+        setError(data.error || 'Failed to delete location')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const startEditLocation = (location: SharpenerLocation) => {
+    setEditingLocation(location.locationId)
+    setLocationForm({
+      locationName: location.locationName,
+      streetAddress: location.streetAddress,
+      city: location.city,
+      state: location.state,
+      zipCode: location.zipCode
+    })
+  }
+
+  const cancelEditLocation = () => {
+    setEditingLocation(null)
+    setLocationForm({ locationName: '', streetAddress: '', city: 'Munich', state: 'Bayern', zipCode: '' })
+  }
+
   const handleAddMachine = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedLocation) {
@@ -224,6 +304,81 @@ export default function SharpenerDashboard() {
     } catch (err) {
       setError('An error occurred')
     }
+  }
+
+  const handleUpdateMachine = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!session?.user || !editingMachine) return
+    
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch(`/api/sharpener/machines/${editingMachine}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sharpenerId: session.user.id,
+          ...machineForm
+        })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Machine updated successfully!')
+        setEditingMachine(null)
+        setMachineForm({ machineType: '', radiusOptions: '' })
+        if (selectedLocation) {
+          loadMachines(selectedLocation)
+        }
+      } else {
+        setError(data.error || 'Failed to update machine')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleDeleteMachine = async (machineId: number) => {
+    if (!session?.user) return
+    
+    if (!confirm('Are you sure you want to delete this machine? This will also delete all associated availabilities and appointments.')) {
+      return
+    }
+
+    setError('')
+    setMessage('')
+
+    try {
+      const res = await fetch(`/api/sharpener/machines/${machineId}?sharpenerId=${session.user.id}`, {
+        method: 'DELETE'
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Machine deleted successfully!')
+        if (selectedLocation) {
+          loadMachines(selectedLocation)
+        }
+      } else {
+        setError(data.error || 'Failed to delete machine')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const startEditMachine = (machine: SharpeningMachine) => {
+    setEditingMachine(machine.machineId)
+    setMachineForm({
+      machineType: machine.machineType,
+      radiusOptions: machine.radiusOptions
+    })
+  }
+
+  const cancelEditMachine = () => {
+    setEditingMachine(null)
+    setMachineForm({ machineType: '', radiusOptions: '' })
   }
 
   const handleAddAvailability = async (e: React.FormEvent) => {
@@ -561,8 +716,10 @@ export default function SharpenerDashboard() {
         {activeTab === 'locations' && (
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Add New Location</h2>
-              <form onSubmit={handleAddLocation} className="space-y-4">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {editingLocation ? 'Edit Location' : 'Add New Location'}
+              </h2>
+              <form onSubmit={editingLocation ? handleUpdateLocation : handleAddLocation} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Location Name
@@ -624,9 +781,20 @@ export default function SharpenerDashboard() {
                     />
                   </div>
                 </div>
-                <button type="submit" className="btn-primary w-full">
-                  Add Location
-                </button>
+                <div className="flex gap-2">
+                  <button type="submit" className="btn-primary flex-1">
+                    {editingLocation ? 'Update Location' : 'Add Location'}
+                  </button>
+                  {editingLocation && (
+                    <button 
+                      type="button" 
+                      onClick={cancelEditLocation}
+                      className="btn-secondary flex-1"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </form>
             </div>
 
@@ -639,21 +807,45 @@ export default function SharpenerDashboard() {
                   locations.map((loc) => (
                     <div
                       key={loc.locationId}
-                      className={`p-4 border rounded-lg cursor-pointer transition ${
+                      className={`p-4 border rounded-lg transition ${
                         selectedLocation === loc.locationId
                           ? 'border-primary-600 bg-primary-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => {
-                        setSelectedLocation(loc.locationId)
-                        loadMachines(loc.locationId)
-                      }}
                     >
-                      <h3 className="font-bold text-gray-900">{loc.locationName}</h3>
-                      <p className="text-sm text-gray-600">{loc.streetAddress}</p>
-                      <p className="text-sm text-gray-600">
-                        {loc.city}, {loc.state} {loc.zipCode}
-                      </p>
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedLocation(loc.locationId)
+                          loadMachines(loc.locationId)
+                        }}
+                      >
+                        <h3 className="font-bold text-gray-900">{loc.locationName}</h3>
+                        <p className="text-sm text-gray-600">{loc.streetAddress}</p>
+                        <p className="text-sm text-gray-600">
+                          {loc.city}, {loc.state} {loc.zipCode}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            startEditLocation(loc)
+                          }}
+                          className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded transition flex-1"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteLocation(loc.locationId)
+                          }}
+                          className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded transition flex-1"
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -666,11 +858,13 @@ export default function SharpenerDashboard() {
         {activeTab === 'machines' && (
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Add New Machine</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {editingMachine ? 'Edit Machine' : 'Add New Machine'}
+              </h2>
               {!selectedLocation ? (
                 <p className="text-gray-600">Please select a location first</p>
               ) : (
-                <form onSubmit={handleAddMachine} className="space-y-4">
+                <form onSubmit={editingMachine ? handleUpdateMachine : handleAddMachine} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Selected Location
@@ -717,9 +911,20 @@ export default function SharpenerDashboard() {
                       onChange={(e) => setMachineForm({ ...machineForm, radiusOptions: e.target.value })}
                     />
                   </div>
-                  <button type="submit" className="btn-primary w-full">
-                    Add Machine
-                  </button>
+                  <div className="flex gap-2">
+                    <button type="submit" className="btn-primary flex-1">
+                      {editingMachine ? 'Update Machine' : 'Add Machine'}
+                    </button>
+                    {editingMachine && (
+                      <button 
+                        type="button" 
+                        onClick={cancelEditMachine}
+                        className="btn-secondary flex-1"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </form>
               )}
             </div>
@@ -733,15 +938,39 @@ export default function SharpenerDashboard() {
                   machines.map((machine) => (
                     <div
                       key={machine.machineId}
-                      className={`p-4 border rounded-lg cursor-pointer transition ${
+                      className={`p-4 border rounded-lg transition ${
                         selectedMachine === machine.machineId
                           ? 'border-primary-600 bg-primary-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => setSelectedMachine(machine.machineId)}
                     >
-                      <h3 className="font-bold text-gray-900">{machine.machineType}</h3>
-                      <p className="text-sm text-gray-600">Radius: {machine.radiusOptions}</p>
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => setSelectedMachine(machine.machineId)}
+                      >
+                        <h3 className="font-bold text-gray-900">{machine.machineType}</h3>
+                        <p className="text-sm text-gray-600">Radius: {machine.radiusOptions}</p>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditMachine(machine);
+                          }}
+                          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteMachine(machine.machineId);
+                          }}
+                          className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
