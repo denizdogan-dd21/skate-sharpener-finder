@@ -120,7 +120,7 @@ export default function SearchPage() {
                 onChange={(e) => setShowAll(e.target.checked)}
               />
               <label htmlFor="showAll" className="ml-2 text-sm font-medium text-gray-700">
-                Show all sharpeners (including those with no availability in the next 14 days)
+                {t('search.showAll')}
               </label>
             </div>
             <button
