@@ -79,10 +79,11 @@
       "password": "Passwort",
       "confirmPassword": "Passwort bestätigen",
       "bio": "Biografie (Optional)",
-      "bioPlaceholder": "Erzählen Sie Kunden von Ihrer Erfahrung und Ihren Dienstleistungen...",
+      "bioPlaceholder": "Erzählen Sie Kunden von Ihrer Erfahrung...",
       "submitButton": "Konto erstellen",
       "submitting": "Konto wird erstellt...",
-      "passwordMismatch": "Passwörter stimmen nicht überein"
+      "passwordMismatch": "Passwörter stimmen nicht überein",
+      "passwordHint": "Mindestens 8 Zeichen mit Groß- und Kleinbuchstaben und einer Zahl"
     }
   },
   "search": {
@@ -100,7 +101,8 @@
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
     "showAll": "Alle Schleifer anzeigen (auch ohne Verfügbarkeit in den nächsten 14 Tagen)",
-    "available14Days": "Verfügbar in den nächsten 14 Tagen:"
+    "available14Days": "Verfügbar in den nächsten 14 Tagen:",
+    "machines": "Maschinen:"
   },
   "sharpener": {
     "profile": "Schleifer-Profil",

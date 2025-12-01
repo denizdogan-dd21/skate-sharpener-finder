@@ -92,7 +92,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                I am a
+                {t('auth.register.iAm')}
               </label>
               <div className="flex space-x-4">
                 <label className="flex items-center">
@@ -104,7 +104,7 @@ export default function RegisterPage() {
                     onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
-                  <span className="text-gray-900">Customer</span>
+                  <span className="text-gray-900">{t('auth.register.customer')}</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -115,7 +115,7 @@ export default function RegisterPage() {
                     onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
-                  <span className="text-gray-900">Sharpener</span>
+                  <span className="text-gray-900">{t('auth.register.sharpener')}</span>
                 </label>
               </div>
             </div>
@@ -123,7 +123,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name
+                  {t('auth.register.firstName')}
                 </label>
                 <input
                   id="firstName"
@@ -136,7 +136,7 @@ export default function RegisterPage() {
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name
+                  {t('auth.register.lastName')}
                 </label>
                 <input
                   id="lastName"
@@ -151,7 +151,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
+                {t('auth.register.email')}
               </label>
               <input
                 id="email"
@@ -165,7 +165,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
+                {t('auth.register.phone')}
               </label>
               <input
                 id="phone"
@@ -180,7 +180,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                {t('auth.register.password')}
               </label>
               <input
                 id="password"
@@ -191,20 +191,20 @@ export default function RegisterPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
               <p className="mt-1 text-xs text-gray-500">
-                At least 8 characters with uppercase, lowercase, and number
+                {t('auth.register.passwordHint')}
               </p>
             </div>
 
             {formData.accountType === 'sharpener' && (
               <div>
                 <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio (Optional)
+                  {t('auth.register.bio')}
                 </label>
                 <textarea
                   id="bio"
                   rows={3}
                   className="input-field"
-                  placeholder="Tell customers about your experience..."
+                  placeholder={t('auth.register.bioPlaceholder')}
                   value={formData.bio}
                   onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 />
@@ -216,7 +216,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? t('auth.register.submitting') : t('auth.register.submitButton')}
             </button>
           </form>
         </div>

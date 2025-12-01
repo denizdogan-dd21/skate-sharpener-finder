@@ -184,7 +184,7 @@ export default function SearchPage() {
                     {/* Machines */}
                     {result.machines && result.machines.length > 0 && (
                       <div className="mb-4">
-                        <h4 className="font-semibold text-gray-700 mb-2">Machines:</h4>
+                        <h4 className="font-semibold text-gray-700 mb-2">{t('search.machines')}</h4>
                         <div className="flex flex-wrap gap-2">
                           {result.machines.map((machine: any) => (
                             <span key={machine.machineId} className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm">
