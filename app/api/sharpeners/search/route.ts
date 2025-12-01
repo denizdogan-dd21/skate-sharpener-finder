@@ -70,15 +70,23 @@ async function ensureLocationCoordinates(location: any): Promise<void> {
   
   const coords = await geocodeAddress(location.city, location.state, location.zipCode)
   if (coords) {
-    await prisma.sharpenerLocation.update({
-      where: { locationId: location.locationId },
-      data: {
-        latitude: coords.lat as any,
-        longitude: coords.lon as any
-      }
-    })
-    location.latitude = coords.lat
-    location.longitude = coords.lon
+    try {
+      await prisma.sharpenerLocation.update({
+        where: { locationId: location.locationId },
+        data: {
+          latitude: coords.lat as any,
+          longitude: coords.lon as any
+        }
+      })
+      location.latitude = coords.lat
+      location.longitude = coords.lon
+    } catch (error) {
+      // Database doesn't have latitude/longitude columns yet
+      // Just set them in memory for this request
+      console.warn('Could not update location coordinates in database:', error)
+      location.latitude = coords.lat
+      location.longitude = coords.lon
+    }
   }
 }
 
@@ -112,7 +120,16 @@ export async function GET(request: NextRequest) {
       where: {
         isActive: true
       },
-      include: {
+      select: {
+        locationId: true,
+        locationName: true,
+        streetAddress: true,
+        city: true,
+        state: true,
+        zipCode: true,
+        isActive: true,
+        createdAt: true,
+        sharpenerId: true,
         sharpener: {
           select: {
             sharpenerId: true,
