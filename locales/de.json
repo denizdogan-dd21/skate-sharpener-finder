@@ -99,7 +99,8 @@
     "viewProfile": "Profil ansehen",
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
-    "showAll": "Alle Schleifer anzeigen (auch ohne Verfügbarkeit in den nächsten 14 Tagen)"
+    "showAll": "Alle Schleifer anzeigen (auch ohne Verfügbarkeit in den nächsten 14 Tagen)",
+    "available14Days": "Verfügbar in den nächsten 14 Tagen:"
   },
   "sharpener": {
     "profile": "Schleifer-Profil",
