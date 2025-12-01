@@ -2,21 +2,31 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import type { 
+  SharpenerLocation, 
+  SharpeningMachine, 
+  Availability, 
+  Appointment,
+  LocationFormData,
+  MachineFormData,
+  AvailabilityFormData
+} from '@/types'
 
 export default function SharpenerDashboard() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [user, setUser] = useState<any>(null)
+  const { data: session, status } = useSession()
   const [activeTab, setActiveTab] = useState('locations')
-  const [locations, setLocations] = useState<any[]>([])
-  const [machines, setMachines] = useState<any[]>([])
-  const [availabilities, setAvailabilities] = useState<any[]>([])
-  const [appointments, setAppointments] = useState<any[]>([])
+  const [locations, setLocations] = useState<SharpenerLocation[]>([])
+  const [machines, setMachines] = useState<SharpeningMachine[]>([])
+  const [availabilities, setAvailabilities] = useState<Availability[]>([])
+  const [appointments, setAppointments] = useState<Appointment[]>([])
   const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
   const [selectedMachine, setSelectedMachine] = useState<number | null>(null)
 
   // Location form
-  const [locationForm, setLocationForm] = useState({
+  const [locationForm, setLocationForm] = useState<LocationFormData>({
     locationName: '',
     streetAddress: '',
     city: 'Munich',
@@ -25,13 +35,13 @@ export default function SharpenerDashboard() {
   })
 
   // Machine form
-  const [machineForm, setMachineForm] = useState({
+  const [machineForm, setMachineForm] = useState<MachineFormData>({
     machineType: '',
     radiusOptions: ''
   })
 
   // Availability form
-  const [availabilityForm, setAvailabilityForm] = useState({
+  const [availabilityForm, setAvailabilityForm] = useState<AvailabilityFormData>({
     availableDate: '',
     startTime: '',
     endTime: '',
@@ -45,38 +55,22 @@ export default function SharpenerDashboard() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Check for query parameters from email actions
-    const success = searchParams.get('success')
-    const errorParam = searchParams.get('error')
+    // Redirect if not authenticated or not a sharpener
+    if (status === 'loading') return
     
-    if (success === 'accepted') {
-      setMessage('Appointment accepted successfully! The customer has been notified.')
-      setTimeout(() => setMessage(''), 5000)
-    } else if (success === 'denied') {
-      setMessage('Appointment declined. The customer has been notified.')
-      setTimeout(() => setMessage(''), 5000)
-    } else if (errorParam) {
-      setError('There was an issue processing the appointment. Please try again.')
-      setTimeout(() => setError(''), 5000)
-    }
-  }, [searchParams])
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (!userData) {
+    if (status === 'unauthenticated') {
       router.push('/auth/login')
       return
     }
-    const parsedUser = JSON.parse(userData)
-    console.log('Dashboard user data:', parsedUser)
-    if (parsedUser.accountType !== 'sharpener') {
+
+    if (session?.user?.accountType !== 'sharpener') {
       router.push('/search')
       return
     }
-    setUser(parsedUser)
-    loadLocations(parsedUser.sharpenerId)
-    loadAppointments(parsedUser.sharpenerId)
-  }, [router])
+
+    loadLocations(session.user.id)
+    loadAppointments(session.user.id)
+  }, [status, session, router])
 
   const loadLocations = async (sharpenerId: number) => {
     try {
@@ -148,17 +142,19 @@ export default function SharpenerDashboard() {
   }
 
   const handleAppointmentAction = async (appointmentId: number, status: string) => {
+    if (!session?.user) return
+    
     try {
       const res = await fetch(`/api/appointments/${appointmentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, sharpenerId: user.sharpenerId })
+        body: JSON.stringify({ status, sharpenerId: session.user.id })
       })
 
       const data = await res.json()
       if (res.ok) {
         setMessage(`Appointment ${status.toLowerCase()} successfully!`)
-        loadAppointments(user.sharpenerId)
+        loadAppointments(session.user.id)
       } else {
         setError(data.error || 'Failed to update appointment')
       }
@@ -169,6 +165,8 @@ export default function SharpenerDashboard() {
 
   const handleAddLocation = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!session?.user) return
+    
     setError('')
     setMessage('')
 
@@ -177,7 +175,7 @@ export default function SharpenerDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sharpenerId: user.sharpenerId,
+          sharpenerId: session.user.id,
           ...locationForm
         })
       })
@@ -186,7 +184,7 @@ export default function SharpenerDashboard() {
       if (res.ok) {
         setMessage('Location added successfully!')
         setLocationForm({ locationName: '', streetAddress: '', city: 'Munich', state: 'Bayern', zipCode: '' })
-        loadLocations(user.sharpenerId)
+        loadLocations(session.user.id)
       } else {
         setError(data.error || 'Failed to add location')
       }
@@ -239,7 +237,7 @@ export default function SharpenerDashboard() {
     setMessage('')
 
     try {
-      const repeatWeeks = parseInt(availabilityForm.repeatWeeks) || 1
+      const repeatWeeks = parseInt(availabilityForm.repeatWeeks || '1') || 1
       const baseDate = new Date(availabilityForm.availableDate)
       
       // Create availabilities for each week
@@ -355,14 +353,15 @@ export default function SharpenerDashboard() {
     setAvailabilityForm({ availableDate: '', startTime: '', endTime: '', price: '', repeatWeeks: '1' })
   }
 
-  if (!user) return null
+  if (status === 'loading') return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>
+  if (!session?.user) return null
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900">Sharpener Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome, {user.firstName} {user.lastName}!</p>
+          <p className="text-gray-600 mt-2">Welcome, {session?.user?.firstName} {session?.user?.lastName}!</p>
         </div>
 
         {/* Tabs */}
@@ -445,10 +444,10 @@ export default function SharpenerDashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h4 className="text-lg font-bold text-gray-900">
-                            {apt.user.firstName} {apt.user.lastName}
+                            {apt.user?.firstName} {apt.user?.lastName}
                           </h4>
-                          <p className="text-gray-700">📞 {apt.user.phone}</p>
-                          <p className="text-gray-700">📧 {apt.user.email}</p>
+                          <p className="text-gray-700">📞 {apt.user?.phone}</p>
+                          <p className="text-gray-700">📧 {apt.user?.email}</p>
                         </div>
                         <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                           PENDING
@@ -464,8 +463,8 @@ export default function SharpenerDashboard() {
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Location</p>
-                          <p className="font-semibold text-gray-900">{apt.location.locationName}</p>
-                          <p className="text-sm text-gray-700">{apt.location.city}, {apt.location.state}</p>
+                          <p className="font-semibold text-gray-900">{apt.location?.locationName}</p>
+                          <p className="text-sm text-gray-700">{apt.location?.city}, {apt.location?.state}</p>
                         </div>
                       </div>
                       {apt.notes && (
@@ -506,9 +505,9 @@ export default function SharpenerDashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h4 className="text-lg font-bold text-gray-900">
-                            {apt.user.firstName} {apt.user.lastName}
+                            {apt.user?.firstName} {apt.user?.lastName}
                           </h4>
-                          <p className="text-gray-700">📞 {apt.user.phone}</p>
+                          <p className="text-gray-700">📞 {apt.user?.phone}</p>
                         </div>
                         <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                           CONFIRMED
@@ -517,7 +516,7 @@ export default function SharpenerDashboard() {
                       <p className="font-semibold text-gray-900">
                         {new Date(apt.requestedDate).toLocaleDateString()} at {apt.startTime}
                       </p>
-                      <p className="text-sm text-gray-700">{apt.location.locationName}</p>
+                      <p className="text-sm text-gray-700">{apt.location?.locationName}</p>
                     </div>
                   ))
                 )}
@@ -536,7 +535,7 @@ export default function SharpenerDashboard() {
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="font-bold text-gray-900">
-                            {apt.user.firstName} {apt.user.lastName}
+                            {apt.user?.firstName} {apt.user?.lastName}
                           </h4>
                           <p className="text-sm text-gray-600">
                             {new Date(apt.requestedDate).toLocaleDateString()} at {apt.startTime}
@@ -903,9 +902,7 @@ export default function SharpenerDashboard() {
                   availabilities.map((avail) => (
                     <div
                       key={avail.availabilityId}
-                      className={`p-3 border rounded-lg ${
-                        avail.isBooked ? 'border-gray-300 bg-gray-100' : 'border-green-300 bg-green-50'
-                      } ${editingAvailability === avail.availabilityId ? 'ring-2 ring-primary-600' : ''}`}
+                      className={`p-3 border rounded-lg border-green-300 bg-green-50 ${editingAvailability === avail.availabilityId ? 'ring-2 ring-primary-600' : ''}`}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -920,19 +917,15 @@ export default function SharpenerDashboard() {
                           <p className="text-sm text-gray-600">
                             {avail.startTime} - {avail.endTime}
                           </p>
-                          <p className="text-sm text-gray-600">{avail.machine.machineType}</p>
+                          <p className="text-sm text-gray-600">{avail.machine?.machineType}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-primary-600">${avail.price}</p>
-                          {avail.isBooked && (
-                            <span className="text-xs bg-gray-200 px-2 py-1 rounded">Booked</span>
-                          )}
                         </div>
                       </div>
-                      {!avail.isBooked && (
-                        <div className="flex gap-2 mt-2">
-                          <button
-                            onClick={() => startEditAvailability(avail)}
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => startEditAvailability(avail)}
                             className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition flex-1"
                           >
                             Edit
@@ -944,7 +937,6 @@ export default function SharpenerDashboard() {
                             Delete
                           </button>
                         </div>
-                      )}
                     </div>
                   ))
                 )}

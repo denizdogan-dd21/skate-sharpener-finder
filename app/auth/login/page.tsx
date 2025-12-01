@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import type { LoginFormData } from '@/types'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
     accountType: 'user'
@@ -20,29 +22,26 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        accountType: formData.accountType,
+        redirect: false,
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed')
+      if (result?.error) {
+        setError(result.error)
         setLoading(false)
         return
       }
 
-      // Store user data in localStorage (in production, use proper session management)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      
       // Redirect based on account type
-      if (data.user.accountType === 'sharpener') {
+      if (formData.accountType === 'sharpener') {
         router.push('/dashboard')
       } else {
         router.push('/search')
       }
+      router.refresh()
     } catch (err) {
       setError('An error occurred. Please try again.')
       setLoading(false)
@@ -81,7 +80,7 @@ export default function LoginPage() {
                     name="accountType"
                     value="user"
                     checked={formData.accountType === 'user'}
-                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
                   <span className="text-gray-900">Customer</span>
@@ -92,7 +91,7 @@ export default function LoginPage() {
                     name="accountType"
                     value="sharpener"
                     checked={formData.accountType === 'sharpener'}
-                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
                     className="mr-2"
                   />
                   <span className="text-gray-900">Sharpener</span>

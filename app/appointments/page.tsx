@@ -2,31 +2,33 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import type { Appointment } from '@/types'
 
 export default function UserAppointmentsPage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [appointments, setAppointments] = useState<any[]>([])
+  const { data: session, status } = useSession()
+  const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (!userData) {
+    if (status === 'loading') return
+    
+    if (status === 'unauthenticated') {
       router.push('/auth/login')
       return
     }
-    const parsedUser = JSON.parse(userData)
-    console.log('Appointments page user data:', parsedUser)
-    if (parsedUser.accountType !== 'user') {
+
+    if (session?.user?.accountType !== 'user') {
       router.push('/dashboard')
       return
     }
-    setUser(parsedUser)
-    loadAppointments(parsedUser.userId)
-  }, [router])
+
+    loadAppointments(session.user.id)
+  }, [status, session, router])
 
   const loadAppointments = async (userId: number) => {
     try {
@@ -53,11 +55,13 @@ export default function UserAppointmentsPage() {
       return
     }
 
+    if (!session?.user) return
+
     try {
       const res = await fetch(`/api/appointments/${appointmentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'CANCELLED', userId: user.userId })
+        body: JSON.stringify({ status: 'CANCELLED', userId: session.user.id })
       })
 
       const data = await res.json()
@@ -65,7 +69,7 @@ export default function UserAppointmentsPage() {
       if (res.ok) {
         setMessage('Appointment cancelled successfully')
         setError('')
-        loadAppointments(user.userId)
+        loadAppointments(session.user.id)
         setTimeout(() => setMessage(''), 3000)
       } else {
         setError(data.error || 'Failed to cancel appointment')
@@ -117,7 +121,7 @@ export default function UserAppointmentsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-gray-900">My Appointments</h1>
-          <p className="text-gray-600 mt-2">Welcome back, {user?.firstName}!</p>
+          <p className="text-gray-600 mt-2">Welcome back, {session?.user?.firstName}!</p>
         </div>
 
         {/* Messages */}
@@ -149,9 +153,9 @@ export default function UserAppointmentsPage() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">
-                        {apt.sharpener.firstName} {apt.sharpener.lastName}
+                        {apt.sharpener?.firstName} {apt.sharpener?.lastName}
                       </h3>
-                      {apt.status === 'CONFIRMED' && apt.sharpener.phone && (
+                      {apt.status === 'CONFIRMED' && apt.sharpener?.phone && (
                         <p className="text-gray-700">📞 {apt.sharpener.phone}</p>
                       )}
                     </div>
@@ -173,8 +177,8 @@ export default function UserAppointmentsPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Location</p>
-                      <p className="font-semibold text-gray-900">{apt.location.locationName}</p>
-                      {apt.status === 'CONFIRMED' && apt.location.streetAddress ? (
+                      <p className="font-semibold text-gray-900">{apt.location?.locationName}</p>
+                      {apt.status === 'CONFIRMED' && apt.location?.streetAddress ? (
                         <>
                           <p className="text-sm text-gray-700">{apt.location.streetAddress}</p>
                           <p className="text-sm text-gray-700">
@@ -183,7 +187,7 @@ export default function UserAppointmentsPage() {
                         </>
                       ) : (
                         <p className="text-sm text-gray-700">
-                          {apt.location.city}, {apt.location.state}
+                          {apt.location?.city}, {apt.location?.state}
                         </p>
                       )}
                     </div>
@@ -192,7 +196,7 @@ export default function UserAppointmentsPage() {
                   {apt.machine && (
                     <div className="mb-4">
                       <p className="text-sm text-gray-600">Machine</p>
-                      <p className="text-gray-900">{apt.machine.machineType}</p>
+                      <p className="text-gray-900">{apt.machine?.machineType}</p>
                     </div>
                   )}
 
@@ -247,7 +251,7 @@ export default function UserAppointmentsPage() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">
-                        {apt.sharpener.firstName} {apt.sharpener.lastName}
+                        {apt.sharpener?.firstName} {apt.sharpener?.lastName}
                       </h3>
                     </div>
                     {getStatusBadge(apt.status)}
@@ -256,8 +260,8 @@ export default function UserAppointmentsPage() {
                   <p className="text-gray-900 mb-2">
                     {new Date(apt.requestedDate).toLocaleDateString()} at {apt.startTime}
                   </p>
-                  <p className="text-sm text-gray-600">{apt.location.locationName}</p>
-                  <p className="text-sm text-gray-600">{apt.location.city}, {apt.location.state}</p>
+                  <p className="text-sm text-gray-600">{apt.location?.locationName}</p>
+                  <p className="text-sm text-gray-600">{apt.location?.city}, {apt.location?.state}</p>
 
                   {apt.status === 'DENIED' && (
                     <div className="bg-red-50 border border-red-200 rounded p-3 mt-3">

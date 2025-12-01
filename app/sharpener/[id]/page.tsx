@@ -2,25 +2,31 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import type { Sharpener, SharpenerLocation, SharpeningMachine, Availability } from '@/types'
+
+interface SharpenerWithDetails extends Sharpener {
+  locations: (SharpenerLocation & {
+    machines: SharpeningMachine[]
+    availabilities: Availability[]
+  })[]
+  ratings: any[]
+}
 
 export default function SharpenerProfilePage() {
   const params = useParams()
   const router = useRouter()
-  const [sharpener, setSharpener] = useState<any>(null)
+  const { data: session } = useSession()
+  const [sharpener, setSharpener] = useState<SharpenerWithDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [user, setUser] = useState<any>(null)
-  const [selectedAvailability, setSelectedAvailability] = useState<any>(null)
+  const [selectedAvailability, setSelectedAvailability] = useState<Availability | null>(null)
   const [bookingNotes, setBookingNotes] = useState('')
   const [bookingSuccess, setBookingSuccess] = useState(false)
   const [selectedInterval, setSelectedInterval] = useState('')
   const [bookedIntervals, setBookedIntervals] = useState<{[key: number]: string[]}>({}) // availabilityId -> array of booked intervals
 
   useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      setUser(JSON.parse(userData))
-    }
     loadSharpener()
   }, [params.id])
 
@@ -93,12 +99,12 @@ export default function SharpenerProfilePage() {
   }
 
   const handleBooking = async () => {
-    if (!user) {
+    if (!session?.user) {
       router.push('/auth/login')
       return
     }
 
-    if (user.accountType !== 'user') {
+    if (session.user.accountType !== 'user') {
       alert('Only customers can book appointments')
       return
     }
@@ -113,13 +119,18 @@ export default function SharpenerProfilePage() {
       return
     }
 
+    if (!sharpener) {
+      alert('Sharpener data not loaded')
+      return
+    }
+
     try {
       const [start, end] = selectedInterval.split('-')
       const res = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.userId,
+          userId: session.user.id,
           sharpenerId: sharpener.sharpenerId,
           locationId: selectedAvailability.locationId,
           machineId: selectedAvailability.machineId,
@@ -183,7 +194,9 @@ export default function SharpenerProfilePage() {
         <div className="card mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">{sharpener.name}</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                {sharpener.firstName} {sharpener.lastName}
+              </h1>
               {sharpener.bio && (
                 <p className="text-sm sm:text-base text-gray-600 mt-2">{sharpener.bio}</p>
               )}
@@ -233,13 +246,13 @@ export default function SharpenerProfilePage() {
                         <div
                           key={avail.availabilityId}
                           onClick={async () => {
-                            if (!user) {
+                            if (!session?.user) {
                               if (confirm('You need to log in to book an appointment. Would you like to log in now?')) {
                                 router.push('/auth/login')
                               }
                               return
                             }
-                            if (user.accountType !== 'user') {
+                            if (session.user.accountType !== 'user') {
                               alert('Only customers can book appointments')
                               return
                             }
@@ -384,11 +397,11 @@ export default function SharpenerProfilePage() {
         )}
 
         {/* Reviews */}
-        {sharpener.recentReviews.length > 0 && (
+        {sharpener.ratings && sharpener.ratings.length > 0 && (
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Recent Reviews</h2>
             <div className="space-y-4">
-              {sharpener.recentReviews.map((review: any) => (
+              {sharpener.ratings.map((review: any) => (
                 <div key={review.ratingId} className="card">
                   <div className="flex flex-col sm:flex-row items-start justify-between mb-2 gap-2">
                     <div>

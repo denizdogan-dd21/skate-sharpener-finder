@@ -6,30 +6,24 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useSession, signOut } from 'next-auth/react'
+import AuthProvider from './providers'
+import type { User, Sharpener } from '@/types'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function LayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(null)
+  const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      setUser(JSON.parse(userData))
-    }
-  }, [pathname]) // Re-check user on route change
+  const user = session?.user
 
-  const handleSignOut = () => {
-    localStorage.removeItem('user')
-    setUser(null)
+  const handleSignOut = async () => {
+    await signOut({ redirect: false })
     router.push('/')
+    router.refresh()
   }
 
   return (
@@ -188,6 +182,25 @@ export default function RootLayout({
             <p>&copy; 2025 Skate Sharpener Finder. All rights reserved.</p>
           </div>
         </footer>
+      </body>
+    </html>
+  )
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+      </head>
+      <body className={inter.className}>
+        <AuthProvider>
+          <LayoutContent>{children}</LayoutContent>
+        </AuthProvider>
       </body>
     </html>
   )
