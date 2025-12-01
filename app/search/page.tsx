@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import type { SearchResult, SearchCoordinates } from '@/types'
@@ -16,6 +17,7 @@ const MapView = dynamic(() => import('./MapView'), {
 })
 
 export default function SearchPage() {
+  const t = useTranslations()
   const [searchParams, setSearchParams] = useState({
     city: 'Munich',
     state: 'Bayern',
@@ -63,7 +65,7 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Find a Sharpener</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">{t('search.title')}</h1>
 
         {/* Search Form */}
         <div className="card mb-8">
@@ -71,7 +73,7 @@ export default function SearchPage() {
             <div className="grid md:grid-cols-3 gap-4">
               <div>
                 <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                  City
+                  {t('search.city')}
                 </label>
                 <input
                   id="city"
@@ -84,7 +86,7 @@ export default function SearchPage() {
               </div>
               <div>
                 <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
-                  State
+                  {t('search.state')}
                 </label>
                 <input
                   id="state"
@@ -97,7 +99,7 @@ export default function SearchPage() {
               </div>
               <div>
                 <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-2">
-                  Zip Code
+                  {t('search.zipCode')}
                 </label>
                 <input
                   id="zipCode"
@@ -126,7 +128,7 @@ export default function SearchPage() {
               disabled={loading || (!searchParams.city && !searchParams.state && !searchParams.zipCode)}
               className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Searching...' : 'Search'}
+              {loading ? t('search.searching') : t('search.searchButton')}
             </button>
           </form>
         </div>
@@ -220,7 +222,7 @@ export default function SearchPage() {
                       href={`/sharpener/${result.sharpenerId}`}
                       className="btn-primary inline-block"
                     >
-                      View Profile & Book
+                      {t('search.viewProfile')}
                     </Link>
                   </div>
                 ))}
