@@ -98,7 +98,8 @@
     "reviews": "Bewertungen",
     "viewProfile": "Profil ansehen",
     "listView": "Listenansicht",
-    "mapView": "Kartenansicht"
+    "mapView": "Kartenansicht",
+    "showAll": "Alle Schleifer anzeigen (auch ohne Verfügbarkeit in den nächsten 14 Tagen)"
   },
   "sharpener": {
     "profile": "Schleifer-Profil",
@@ -198,7 +199,9 @@
       "endTime": "Endzeit",
       "price": "Preis",
       "addButton": "Verfügbarkeit hinzufügen",
-      "deleteButton": "Löschen"
+      "deleteButton": "Löschen",
+      "repeatWeeks": "Wöchentliche Wiederholung (Anzahl der Wochen)",
+      "repeatHelper": "Erstellt denselben Zeitslot für die nächsten X Wochen (z.B., jeden Montag von 9:00-17:00)"
     },
     "appointments": {
       "title": "Terminanfragen",

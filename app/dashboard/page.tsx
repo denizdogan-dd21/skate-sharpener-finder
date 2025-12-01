@@ -1089,7 +1089,7 @@ export default function SharpenerDashboard() {
                   {!editingAvailability && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Repeat Weekly (Number of Weeks)
+                        {t('dashboard.availability.repeatWeeks')}
                       </label>
                       <input
                         type="number"
@@ -1102,7 +1102,7 @@ export default function SharpenerDashboard() {
                         onChange={(e) => setAvailabilityForm({ ...availabilityForm, repeatWeeks: e.target.value })}
                       />
                       <p className="text-xs text-gray-600 mt-1">
-                        Creates the same time slot for the next X weeks (e.g., every Monday at 9:00-17:00)
+                        {t('dashboard.availability.repeatHelper')}
                       </p>
                     </div>
                   )}
