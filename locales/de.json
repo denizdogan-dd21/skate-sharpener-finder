@@ -1,0 +1,253 @@
+{
+  "app": {
+    "name": "Skate Sharpener Connection"
+  },
+  "nav": {
+    "home": "Startseite",
+    "search": "Suchen",
+    "appointments": "Termine",
+    "dashboard": "Dashboard",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden"
+  },
+  "home": {
+    "hero": {
+      "title": "Finden Sie professionelle Schlittschuh-Schleifer",
+      "subtitle": "in Ihrer Nähe",
+      "description": "Verbinden Sie sich mit vertrauenswürdigen Schlittschuh-Schleifern. Durchsuchen Sie Profile, sehen Sie Verfügbarkeiten und buchen Sie Termine mit Leichtigkeit.",
+      "searchButton": "Schleifer suchen",
+      "joinButton": "Als Schleifer beitreten"
+    },
+    "howItWorks": {
+      "title": "So funktioniert es",
+      "search": {
+        "title": "Suchen & Entdecken",
+        "description": "Finden Sie Schleifer nach Standort, sehen Sie Bewertungen und prüfen Sie die Verfügbarkeit in Echtzeit."
+      },
+      "book": {
+        "title": "Termine buchen",
+        "description": "Fordern Sie Termine für bestimmte Zeitfenster an und erhalten Sie Bestätigungen von Schleifern."
+      },
+      "rate": {
+        "title": "Bewerten & Rezensieren",
+        "description": "Teilen Sie Ihre Erfahrungen und helfen Sie, Vertrauen in der Community aufzubauen."
+      }
+    },
+    "forSharpeners": {
+      "title": "Sind Sie ein Schleifer?",
+      "description": "Treten Sie unserer Plattform bei, um Ihren Zeitplan zu verwalten, mehr Kunden zu erreichen und Ihr Geschäft auszubauen.",
+      "ctaButton": "Jetzt starten",
+      "locations": {
+        "title": "Mehrere Standorte",
+        "description": "Verwalten Sie alle Ihre Geschäftsstandorte an einem Ort"
+      },
+      "equipment": {
+        "title": "Geräteverwaltung",
+        "description": "Listen Sie Ihre Maschinen und Radius-Optionen auf"
+      },
+      "reputation": {
+        "title": "Bauen Sie Ihren Ruf auf",
+        "description": "Sammeln Sie Bewertungen und erweitern Sie Ihren Kundenstamm"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Melden Sie sich bei Ihrem Konto an",
+      "createAccount": "ein neues Konto erstellen",
+      "or": "Oder",
+      "accountType": "Kontotyp",
+      "customer": "Kunde",
+      "sharpener": "Schleifer",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "submitButton": "Anmelden",
+      "submitting": "Anmeldung läuft..."
+    },
+    "register": {
+      "title": "Erstellen Sie Ihr Konto",
+      "haveAccount": "Haben Sie bereits ein Konto?",
+      "signIn": "Anmelden",
+      "iAm": "Ich bin ein",
+      "customer": "Kunde",
+      "sharpener": "Schleifer",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail-Adresse",
+      "phone": "Telefonnummer",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "bio": "Biografie (Optional)",
+      "bioPlaceholder": "Erzählen Sie Kunden von Ihrer Erfahrung und Ihren Dienstleistungen...",
+      "submitButton": "Konto erstellen",
+      "submitting": "Konto wird erstellt...",
+      "passwordMismatch": "Passwörter stimmen nicht überein"
+    }
+  },
+  "search": {
+    "title": "Finden Sie Schleifer in Ihrer Nähe",
+    "city": "Stadt",
+    "state": "Bundesland",
+    "zipCode": "Postleitzahl",
+    "searchButton": "Suchen",
+    "searching": "Suche läuft...",
+    "results": "Suchergebnisse",
+    "noResults": "Keine Schleifer in dieser Region gefunden",
+    "rating": "Bewertung",
+    "reviews": "Bewertungen",
+    "viewProfile": "Profil ansehen",
+    "listView": "Listenansicht",
+    "mapView": "Kartenansicht"
+  },
+  "sharpener": {
+    "profile": "Schleifer-Profil",
+    "contact": "Kontaktinformationen",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "locations": "Standorte",
+    "machines": "Maschinen",
+    "machineType": "Maschinentyp",
+    "radiusOptions": "Radius-Optionen",
+    "availability": "Verfügbarkeit",
+    "noAvailability": "Keine Verfügbarkeit geplant",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "price": "Preis",
+    "bookAppointment": "Termin buchen",
+    "ratings": "Bewertungen & Rezensionen",
+    "noRatings": "Noch keine Bewertungen",
+    "rated": "bewertet"
+  },
+  "appointments": {
+    "title": "Meine Termine",
+    "noAppointments": "Noch keine Termine",
+    "sharpener": "Schleifer",
+    "location": "Standort",
+    "machine": "Maschine",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "status": "Status",
+    "notes": "Notizen",
+    "actions": "Aktionen",
+    "rateButton": "Service bewerten",
+    "cancelButton": "Stornieren",
+    "statuses": {
+      "PENDING": "PENDING",
+      "CONFIRMED": "CONFIRMED",
+      "DENIED": "DENIED",
+      "CANCELLED": "CANCELLED",
+      "COMPLETED": "COMPLETED",
+      "RATED": "RATED",
+      "EXPIRED": "EXPIRED"
+    }
+  },
+  "dashboard": {
+    "title": "Schleifer Dashboard",
+    "welcome": "Willkommen",
+    "tabs": {
+      "locations": "Standorte",
+      "machines": "Maschinen",
+      "availability": "Verfügbarkeit",
+      "appointments": "Termine"
+    },
+    "locations": {
+      "add": "Neuen Standort hinzufügen",
+      "edit": "Standort bearbeiten",
+      "your": "Ihre Standorte",
+      "none": "Noch keine Standorte hinzugefügt",
+      "name": "Standortname",
+      "namePlaceholder": "z.B., Hauptgeschäft, Nordarena",
+      "street": "Straße",
+      "city": "Stadt",
+      "state": "Bundesland",
+      "zip": "Postleitzahl",
+      "addButton": "Standort hinzufügen",
+      "updateButton": "Standort aktualisieren",
+      "cancelButton": "Abbrechen",
+      "editButton": "Bearbeiten",
+      "deleteButton": "Löschen"
+    },
+    "machines": {
+      "add": "Neue Maschine hinzufügen",
+      "edit": "Maschine bearbeiten",
+      "your": "Ihre Maschinen",
+      "none": "Noch keine Maschinen hinzugefügt",
+      "selectLocation": "Bitte wählen Sie zuerst einen Standort aus",
+      "location": "Standort",
+      "type": "Maschinentyp",
+      "typePlaceholder": "z.B., Blademaster, Sparx",
+      "radius": "Radius-Optionen (kommagetrennt)",
+      "radiusPlaceholder": "1/2, 5/8, 3/4, 7/8, 1",
+      "addButton": "Maschine hinzufügen",
+      "updateButton": "Maschine aktualisieren",
+      "cancelButton": "Abbrechen",
+      "editButton": "Bearbeiten",
+      "deleteButton": "Löschen",
+      "radiusLabel": "Radius"
+    },
+    "availability": {
+      "add": "Verfügbarkeitsslot hinzufügen",
+      "your": "Ihre Verfügbarkeit",
+      "none": "Noch keine Verfügbarkeit hinzugefügt",
+      "selectMachine": "Bitte wählen Sie zuerst eine Maschine aus",
+      "location": "Standort",
+      "machine": "Maschine",
+      "date": "Datum",
+      "startTime": "Startzeit",
+      "endTime": "Endzeit",
+      "price": "Preis",
+      "addButton": "Verfügbarkeit hinzufügen",
+      "deleteButton": "Löschen"
+    },
+    "appointments": {
+      "title": "Terminanfragen",
+      "none": "Keine Terminanfragen",
+      "customer": "Kunde",
+      "location": "Standort",
+      "machine": "Maschine",
+      "date": "Datum",
+      "time": "Uhrzeit",
+      "status": "Status",
+      "notes": "Notizen",
+      "acceptButton": "Annehmen",
+      "denyButton": "Ablehnen"
+    }
+  },
+  "booking": {
+    "title": "Termin buchen",
+    "selectSlot": "Wählen Sie einen Verfügbarkeitsslot aus",
+    "notes": "Notizen (Optional)",
+    "notesPlaceholder": "Besondere Wünsche oder Informationen...",
+    "submitButton": "Termin anfragen",
+    "submitting": "Wird gesendet...",
+    "success": "Termin erfolgreich angefragt!",
+    "error": "Termin konnte nicht gebucht werden"
+  },
+  "rating": {
+    "title": "Bewerten Sie Ihre Erfahrung",
+    "rating": "Bewertung",
+    "comment": "Kommentar (Optional)",
+    "commentPlaceholder": "Teilen Sie Ihre Erfahrung...",
+    "submitButton": "Bewertung absenden",
+    "submitting": "Wird gesendet...",
+    "success": "Bewertung erfolgreich abgesendet!",
+    "error": "Bewertung konnte nicht abgesendet werden"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "error": "Ein Fehler ist aufgetreten",
+    "success": "Erfolgreich",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "update": "Aktualisieren",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "back": "Zurück"
+  }
+}

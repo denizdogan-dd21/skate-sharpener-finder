@@ -4,10 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import type { RegisterFormData } from '@/types'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const t = useTranslations()
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
@@ -71,11 +73,11 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900">Create your account</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900">{t('auth.register.title')}</h2>
           <p className="mt-2 text-gray-600">
-            Already have an account?{' '}
+            {t('auth.register.haveAccount')}{' '}
             <Link href="/auth/login" className="text-primary-600 hover:text-primary-700 font-medium">
-              Sign in
+              {t('auth.register.signIn')}
             </Link>
           </p>
         </div>

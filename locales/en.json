@@ -1,0 +1,253 @@
+{
+  "app": {
+    "name": "Skate Sharpener Connection"
+  },
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "appointments": "Appointments",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero": {
+      "title": "Find Professional Skate Sharpeners",
+      "subtitle": "Near You",
+      "description": "Connect with trusted skate sharpening professionals. Browse profiles, view availability, and book appointments with ease.",
+      "searchButton": "Search Sharpeners",
+      "joinButton": "Join as Sharpener"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "search": {
+        "title": "Search & Discover",
+        "description": "Find sharpeners by location, view ratings, and check availability in real-time."
+      },
+      "book": {
+        "title": "Book Appointments",
+        "description": "Request appointments for specific time slots and get confirmation from sharpeners."
+      },
+      "rate": {
+        "title": "Rate & Review",
+        "description": "Share your experience and help build trust in the community."
+      }
+    },
+    "forSharpeners": {
+      "title": "Are You a Sharpener?",
+      "description": "Join our platform to manage your schedule, reach more customers, and grow your business.",
+      "ctaButton": "Get Started Today",
+      "locations": {
+        "title": "Multiple Locations",
+        "description": "Manage all your business locations in one place"
+      },
+      "equipment": {
+        "title": "Equipment Management",
+        "description": "List your machines and radius options"
+      },
+      "reputation": {
+        "title": "Build Your Reputation",
+        "description": "Collect ratings and grow your customer base"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "createAccount": "create a new account",
+      "or": "Or",
+      "accountType": "Account Type",
+      "customer": "Customer",
+      "sharpener": "Sharpener",
+      "email": "Email address",
+      "password": "Password",
+      "submitButton": "Sign in",
+      "submitting": "Signing in..."
+    },
+    "register": {
+      "title": "Create your account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "iAm": "I am a",
+      "customer": "Customer",
+      "sharpener": "Sharpener",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email address",
+      "phone": "Phone Number",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "bio": "Bio (Optional)",
+      "bioPlaceholder": "Tell customers about your experience and services...",
+      "submitButton": "Create Account",
+      "submitting": "Creating account...",
+      "passwordMismatch": "Passwords do not match"
+    }
+  },
+  "search": {
+    "title": "Find Sharpeners Near You",
+    "city": "City",
+    "state": "State",
+    "zipCode": "ZIP Code",
+    "searchButton": "Search",
+    "searching": "Searching...",
+    "results": "Search Results",
+    "noResults": "No sharpeners found in this area",
+    "rating": "Rating",
+    "reviews": "reviews",
+    "viewProfile": "View Profile",
+    "listView": "List View",
+    "mapView": "Map View"
+  },
+  "sharpener": {
+    "profile": "Sharpener Profile",
+    "contact": "Contact Information",
+    "email": "Email",
+    "phone": "Phone",
+    "locations": "Locations",
+    "machines": "Machines",
+    "machineType": "Machine Type",
+    "radiusOptions": "Radius Options",
+    "availability": "Availability",
+    "noAvailability": "No availability scheduled",
+    "date": "Date",
+    "time": "Time",
+    "price": "Price",
+    "bookAppointment": "Book Appointment",
+    "ratings": "Ratings & Reviews",
+    "noRatings": "No ratings yet",
+    "rated": "rated"
+  },
+  "appointments": {
+    "title": "My Appointments",
+    "noAppointments": "No appointments yet",
+    "sharpener": "Sharpener",
+    "location": "Location",
+    "machine": "Machine",
+    "date": "Date",
+    "time": "Time",
+    "status": "Status",
+    "notes": "Notes",
+    "actions": "Actions",
+    "rateButton": "Rate Service",
+    "cancelButton": "Cancel",
+    "statuses": {
+      "PENDING": "PENDING",
+      "CONFIRMED": "CONFIRMED",
+      "DENIED": "DENIED",
+      "CANCELLED": "CANCELLED",
+      "COMPLETED": "COMPLETED",
+      "RATED": "RATED",
+      "EXPIRED": "EXPIRED"
+    }
+  },
+  "dashboard": {
+    "title": "Sharpener Dashboard",
+    "welcome": "Welcome",
+    "tabs": {
+      "locations": "Locations",
+      "machines": "Machines",
+      "availability": "Availability",
+      "appointments": "Appointments"
+    },
+    "locations": {
+      "add": "Add New Location",
+      "edit": "Edit Location",
+      "your": "Your Locations",
+      "none": "No locations added yet",
+      "name": "Location Name",
+      "namePlaceholder": "e.g., Main Shop, North Arena",
+      "street": "Street Address",
+      "city": "City",
+      "state": "State",
+      "zip": "ZIP Code",
+      "addButton": "Add Location",
+      "updateButton": "Update Location",
+      "cancelButton": "Cancel",
+      "editButton": "Edit",
+      "deleteButton": "Delete"
+    },
+    "machines": {
+      "add": "Add New Machine",
+      "edit": "Edit Machine",
+      "your": "Your Machines",
+      "none": "No machines added yet",
+      "selectLocation": "Please select a location first",
+      "location": "Location",
+      "type": "Machine Type",
+      "typePlaceholder": "e.g., Blademaster, Sparx",
+      "radius": "Radius Options (comma-separated)",
+      "radiusPlaceholder": "1/2, 5/8, 3/4, 7/8, 1",
+      "addButton": "Add Machine",
+      "updateButton": "Update Machine",
+      "cancelButton": "Cancel",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "radiusLabel": "Radius"
+    },
+    "availability": {
+      "add": "Add Availability Slot",
+      "your": "Your Availability",
+      "none": "No availability added yet",
+      "selectMachine": "Please select a machine first",
+      "location": "Location",
+      "machine": "Machine",
+      "date": "Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "price": "Price",
+      "addButton": "Add Availability",
+      "deleteButton": "Delete"
+    },
+    "appointments": {
+      "title": "Appointment Requests",
+      "none": "No appointment requests",
+      "customer": "Customer",
+      "location": "Location",
+      "machine": "Machine",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status",
+      "notes": "Notes",
+      "acceptButton": "Accept",
+      "denyButton": "Deny"
+    }
+  },
+  "booking": {
+    "title": "Book Appointment",
+    "selectSlot": "Select an availability slot",
+    "notes": "Notes (Optional)",
+    "notesPlaceholder": "Any special requests or information...",
+    "submitButton": "Request Appointment",
+    "submitting": "Submitting...",
+    "success": "Appointment requested successfully!",
+    "error": "Failed to book appointment"
+  },
+  "rating": {
+    "title": "Rate Your Experience",
+    "rating": "Rating",
+    "comment": "Comment (Optional)",
+    "commentPlaceholder": "Share your experience...",
+    "submitButton": "Submit Rating",
+    "submitting": "Submitting...",
+    "success": "Rating submitted successfully!",
+    "error": "Failed to submit rating"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "update": "Update",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back"
+  }
+}
