@@ -87,7 +87,23 @@ export async function DELETE(
       )
     }
 
-    // Delete location (cascade will handle related data)
+    // Delete related data explicitly for better control
+    // 1. Delete appointments related to this location
+    await prisma.appointment.deleteMany({
+      where: { locationId }
+    })
+
+    // 2. Delete availability slots for this location
+    await prisma.availability.deleteMany({
+      where: { locationId }
+    })
+
+    // 3. Delete machines at this location
+    await prisma.sharpeningMachine.deleteMany({
+      where: { locationId }
+    })
+
+    // 4. Finally delete the location
     await prisma.sharpenerLocation.delete({
       where: { locationId }
     })
