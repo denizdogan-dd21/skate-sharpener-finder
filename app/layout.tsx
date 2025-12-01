@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl'
 import AuthProvider from './providers'
 import IntlProvider from './IntlProvider'
 import LanguageToggle from '@/components/LanguageToggle'
+import InstallPrompt from '@/components/InstallPrompt'
 import type { User, Sharpener } from '@/types'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -30,10 +31,31 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     router.refresh()
   }
 
+  // Register service worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration.scope)
+        })
+        .catch((error) => {
+          console.log('Service Worker registration failed:', error)
+        })
+    }
+  }, [])
+
   return (
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="theme-color" content="#0066cc" />
+        <meta name="description" content="Connect with trusted skate sharpeners near you" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Sharpener" />
       </head>
       <body className={inter.className}>
         <nav className="bg-white shadow-lg">
@@ -182,6 +204,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         <main className="min-h-screen">
           {children}
         </main>
+        
+        <InstallPrompt />
         
         <footer className="bg-gray-800 text-white py-8 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
