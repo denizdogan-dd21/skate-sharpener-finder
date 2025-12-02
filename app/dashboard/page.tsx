@@ -171,7 +171,7 @@ export default function SharpenerDashboard() {
     if (apt.status !== 'CONFIRMED') return false
     
     // Parse the date and time, treating them as local timezone
-    const dateStr = apt.requestedDate.toString()
+    const dateStr = apt.requestedDate.toString().split('T')[0]
     const [year, month, day] = dateStr.split('-').map(Number)
     const [hours, minutes] = apt.endTime.split(':').map(Number)
     const appointmentDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0)

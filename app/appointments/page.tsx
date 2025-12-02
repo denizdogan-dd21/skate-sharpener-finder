@@ -162,8 +162,8 @@ export default function UserAppointmentsPage() {
     if (apt.status !== 'CONFIRMED') return false
     
     // Parse the date and time, treating them as local timezone
-    // requestedDate comes as string from API despite type definition
-    const dateStr = apt.requestedDate.toString()
+    // requestedDate comes as ISO string like "2025-12-02T00:00:00.000Z"
+    const dateStr = apt.requestedDate.toString().split('T')[0]
     const [year, month, day] = dateStr.split('-').map(Number)
     const [hours, minutes] = apt.endTime.split(':').map(Number)
     const appointmentDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
@@ -186,7 +186,7 @@ export default function UserAppointmentsPage() {
     if (apt.status !== 'COMPLETED') return false
     
     // Parse the date and time, treating them as local timezone
-    const dateStr = apt.requestedDate.toString()
+    const dateStr = apt.requestedDate.toString().split('T')[0]
     const [year, month, day] = dateStr.split('-').map(Number)
     const [hours, minutes] = apt.endTime.split(':').map(Number)
     const appointmentDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
