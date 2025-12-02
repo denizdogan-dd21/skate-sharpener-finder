@@ -8,6 +8,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import AuthProvider from './providers'
 import IntlProvider from './IntlProvider'
 import LanguageToggle from '@/components/LanguageToggle'
@@ -210,6 +211,7 @@ export default function RootLayout({
             <LayoutContent>{children}</LayoutContent>
           </IntlProvider>
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
