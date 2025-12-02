@@ -15,6 +15,9 @@ export default function UserAppointmentsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [ratingAppointmentId, setRatingAppointmentId] = useState<number | null>(null)
+  const [rating, setRating] = useState(0)
+  const [ratingComment, setRatingComment] = useState('')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -82,6 +85,58 @@ export default function UserAppointmentsPage() {
       setError('Failed to cancel appointment')
       setMessage('')
     }
+  }
+
+  const handleSubmitRating = async (appointmentId: number) => {
+    if (!session?.user) return
+
+    if (rating < 1 || rating > 5) {
+      setError('Please select a rating between 1 and 5')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/ratings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointmentId,
+          userId: session.user.id,
+          rating,
+          comment: ratingComment
+        })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage('Rating submitted successfully')
+        setError('')
+        setRatingAppointmentId(null)
+        setRating(0)
+        setRatingComment('')
+        loadAppointments(session.user.id)
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        setError(data.error || 'Failed to submit rating')
+        setMessage('')
+      }
+    } catch (err) {
+      console.error('Rating error:', err)
+      setError('Failed to submit rating')
+      setMessage('')
+    }
+  }
+
+  const canRate = (apt: Appointment) => {
+    if (apt.status !== 'COMPLETED') return false
+    
+    // Check if appointment date/time has passed
+    const appointmentDateTime = new Date(apt.requestedDate)
+    const [hours, minutes] = apt.endTime.split(':').map(Number)
+    appointmentDateTime.setHours(hours, minutes, 0, 0)
+    
+    return appointmentDateTime < new Date()
   }
 
   const getStatusBadge = (status: string) => {
@@ -270,6 +325,68 @@ export default function UserAppointmentsPage() {
                       <p className="text-sm text-red-800">
                         This appointment was declined by the sharpener
                       </p>
+                    </div>
+                  )}
+
+                  {apt.status === 'COMPLETED' && canRate(apt) && (
+                    <div className="mt-4">
+                      {ratingAppointmentId === apt.appointmentId ? (
+                        <div className="bg-blue-50 border border-blue-200 rounded p-4">
+                          <h4 className="font-semibold text-gray-900 mb-3">Leave a Rating</h4>
+                          
+                          {/* Star Rating */}
+                          <div className="flex items-center space-x-2 mb-3">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                onClick={() => setRating(star)}
+                                className="text-3xl focus:outline-none transition"
+                              >
+                                {star <= rating ? '⭐' : '☆'}
+                              </button>
+                            ))}
+                            <span className="text-sm text-gray-600 ml-2">
+                              {rating > 0 ? `${rating} star${rating > 1 ? 's' : ''}` : 'Select rating'}
+                            </span>
+                          </div>
+
+                          {/* Comment */}
+                          <textarea
+                            className="w-full border border-gray-300 rounded-lg p-2 text-sm mb-3"
+                            rows={3}
+                            placeholder="Share your experience (optional)"
+                            value={ratingComment}
+                            onChange={(e) => setRatingComment(e.target.value)}
+                          />
+
+                          {/* Buttons */}
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleSubmitRating(apt.appointmentId)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                            >
+                              Submit Rating
+                            </button>
+                            <button
+                              onClick={() => {
+                                setRatingAppointmentId(null)
+                                setRating(0)
+                                setRatingComment('')
+                              }}
+                              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setRatingAppointmentId(apt.appointmentId)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                          Leave a Rating
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
