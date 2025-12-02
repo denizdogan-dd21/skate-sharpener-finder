@@ -153,10 +153,21 @@ export default function SharpenerProfilePage() {
         await refreshBookedIntervals() // Refresh booked intervals
         loadSharpener() // Reload to update availability
       } else {
+        // Show error message
         alert(data.error || 'Booking failed')
+        
+        // Automatically refresh booked intervals to show updated availability
+        await refreshBookedIntervals()
+        
+        // Clear the selected interval so user can pick another one
+        setSelectedInterval('')
       }
     } catch (err) {
       alert('An error occurred while booking')
+      
+      // Also refresh on error to ensure we have latest data
+      await refreshBookedIntervals()
+      setSelectedInterval('')
     }
   }
 
