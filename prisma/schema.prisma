@@ -108,6 +108,7 @@ enum AppointmentStatus {
   COMPLETED
   RATED
   EXPIRED
+  NO_SHOW
 }
 
 model Appointment {

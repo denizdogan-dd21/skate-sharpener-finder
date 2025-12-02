@@ -74,6 +74,7 @@ export type AppointmentStatus =
   | 'COMPLETED'
   | 'RATED'
   | 'EXPIRED'
+  | 'NO_SHOW'
 
 export interface Appointment {
   appointmentId: number
