@@ -165,8 +165,19 @@ export default function UserAppointmentsPage() {
     const [year, month, day] = apt.requestedDate.split('-').map(Number)
     const [hours, minutes] = apt.endTime.split(':').map(Number)
     const appointmentDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
+    const now = new Date()
     
-    return appointmentDateTime < new Date()
+    // Debug logging
+    console.log('canComplete check:', {
+      aptId: apt.id,
+      requestedDate: apt.requestedDate,
+      endTime: apt.endTime,
+      appointmentDateTime: appointmentDateTime.toString(),
+      now: now.toString(),
+      isPast: appointmentDateTime < now
+    })
+    
+    return appointmentDateTime < now
   }
 
   const canRate = (apt: Appointment) => {
