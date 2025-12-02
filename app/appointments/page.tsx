@@ -171,7 +171,7 @@ export default function UserAppointmentsPage() {
     
     // Debug logging
     console.log('canComplete check:', {
-      aptId: apt.id,
+      aptId: apt.appointmentId,
       requestedDate: apt.requestedDate,
       endTime: apt.endTime,
       appointmentDateTime: appointmentDateTime.toString(),
