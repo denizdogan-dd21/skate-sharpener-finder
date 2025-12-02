@@ -178,7 +178,7 @@ export default function SearchPage() {
                                 <span
                                   key={star}
                                   className={`text-xl ${
-                                    star <= Math.round(result.averageRating)
+                                    star <= Math.round(result.averageRating || 0)
                                       ? 'text-yellow-500'
                                       : 'text-gray-300'
                                   }`}
