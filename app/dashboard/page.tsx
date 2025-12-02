@@ -179,6 +179,26 @@ export default function SharpenerDashboard() {
     return appointmentDateTime < new Date()
   }
 
+  const canCancel = (apt: any) => {
+    // Can only cancel if appointment hasn't started yet
+    const dateStr = apt.requestedDate.toString().split('T')[0]
+    const [year, month, day] = dateStr.split('-').map(Number)
+    const [hours, minutes] = apt.startTime.split(':').map(Number)
+    const appointmentStartTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
+    
+    return appointmentStartTime > new Date()
+  }
+
+  const canMarkNoShow = (apt: any) => {
+    // Can mark as no-show if appointment start time has passed
+    const dateStr = apt.requestedDate.toString().split('T')[0]
+    const [year, month, day] = dateStr.split('-').map(Number)
+    const [hours, minutes] = apt.startTime.split(':').map(Number)
+    const appointmentStartTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
+    
+    return appointmentStartTime < new Date()
+  }
+
   const handleAddLocation = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!session?.user) return
@@ -687,14 +707,32 @@ export default function SharpenerDashboard() {
                       </p>
                       <p className="text-sm text-gray-700">{apt.location?.locationName}</p>
                       
-                      {canMarkComplete(apt) && (
-                        <button
-                          onClick={() => handleAppointmentAction(apt.appointmentId, 'COMPLETED')}
-                          className="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                        >
-                          Mark as Complete
-                        </button>
-                      )}
+                      <div className="mt-3 flex space-x-2">
+                        {canMarkComplete(apt) && (
+                          <button
+                            onClick={() => handleAppointmentAction(apt.appointmentId, 'COMPLETED')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                          >
+                            Mark as Complete
+                          </button>
+                        )}
+                        {canMarkNoShow(apt) && (
+                          <button
+                            onClick={() => handleAppointmentAction(apt.appointmentId, 'NO_SHOW')}
+                            className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                          >
+                            Mark as No Show
+                          </button>
+                        )}
+                        {canCancel(apt) && (
+                          <button
+                            onClick={() => handleAppointmentAction(apt.appointmentId, 'CANCELLED')}
+                            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
@@ -705,10 +743,10 @@ export default function SharpenerDashboard() {
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Past Appointments</h3>
               <div className="space-y-4">
-                {appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED'].includes(a.status)).length === 0 ? (
+                {appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED', 'NO_SHOW'].includes(a.status)).length === 0 ? (
                   <p className="text-gray-500">No past appointments</p>
                 ) : (
-                  appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED'].includes(a.status)).map((apt) => (
+                  appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED', 'NO_SHOW'].includes(a.status)).map((apt) => (
                     <div key={apt.appointmentId} className="card bg-gray-50">
                       <div className="flex justify-between items-start">
                         <div>

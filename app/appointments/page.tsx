@@ -194,6 +194,16 @@ export default function UserAppointmentsPage() {
     return appointmentDateTime < new Date()
   }
 
+  const canCancel = (apt: Appointment) => {
+    // Can only cancel if appointment hasn't started yet
+    const dateStr = apt.requestedDate.toString().split('T')[0]
+    const [year, month, day] = dateStr.split('-').map(Number)
+    const [hours, minutes] = apt.startTime.split(':').map(Number)
+    const appointmentStartTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
+    
+    return appointmentStartTime > new Date()
+  }
+
   const getStatusBadge = (status: string) => {
     const statusConfig: any = {
       PENDING: { bg: 'bg-yellow-500', text: 'Pending' },
@@ -201,7 +211,8 @@ export default function UserAppointmentsPage() {
       DENIED: { bg: 'bg-red-500', text: 'Denied' },
       CANCELLED: { bg: 'bg-gray-500', text: 'Cancelled' },
       COMPLETED: { bg: 'bg-blue-500', text: 'Completed' },
-      RATED: { bg: 'bg-purple-500', text: 'Rated' }
+      RATED: { bg: 'bg-purple-500', text: 'Rated' },
+      NO_SHOW: { bg: 'bg-orange-500', text: 'No Show' }
     }
     const config = statusConfig[status] || { bg: 'bg-gray-500', text: status }
     return (
@@ -215,7 +226,7 @@ export default function UserAppointmentsPage() {
     ['PENDING', 'CONFIRMED'].includes(a.status)
   )
   const pastAppointments = appointments.filter(a => 
-    ['DENIED', 'CANCELLED', 'COMPLETED', 'RATED'].includes(a.status)
+    ['DENIED', 'CANCELLED', 'COMPLETED', 'RATED', 'NO_SHOW'].includes(a.status)
   )
 
   if (loading) {
@@ -344,14 +355,14 @@ export default function UserAppointmentsPage() {
                         Complete & Rate
                       </button>
                     )}
-                    {apt.status === 'PENDING' || apt.status === 'CONFIRMED' ? (
+                    {(apt.status === 'PENDING' || apt.status === 'CONFIRMED') && canCancel(apt) && (
                       <button
                         onClick={() => handleCancelAppointment(apt.appointmentId)}
                         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
                       >
                         {t('appointments.cancelButton')}
                       </button>
-                    ) : null}
+                    )}
                   </div>
                 </div>
               ))
