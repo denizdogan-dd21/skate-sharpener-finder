@@ -167,6 +167,17 @@ export default function SharpenerDashboard() {
     }
   }
 
+  const canMarkComplete = (apt: any) => {
+    if (apt.status !== 'CONFIRMED') return false
+    
+    // Check if appointment end time has passed
+    const appointmentDateTime = new Date(apt.requestedDate)
+    const [hours, minutes] = apt.endTime.split(':').map(Number)
+    appointmentDateTime.setHours(hours, minutes, 0, 0)
+    
+    return appointmentDateTime < new Date()
+  }
+
   const handleAddLocation = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!session?.user) return
@@ -674,6 +685,15 @@ export default function SharpenerDashboard() {
                         {new Date(apt.requestedDate).toLocaleDateString()} at {apt.startTime}
                       </p>
                       <p className="text-sm text-gray-700">{apt.location?.locationName}</p>
+                      
+                      {canMarkComplete(apt) && (
+                        <button
+                          onClick={() => handleAppointmentAction(apt.appointmentId, 'COMPLETED')}
+                          className="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                        >
+                          Mark as Complete
+                        </button>
+                      )}
                     </div>
                   ))
                 )}
