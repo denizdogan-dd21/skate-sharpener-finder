@@ -128,6 +128,47 @@ export default function UserAppointmentsPage() {
     }
   }
 
+  const handleCompleteAndRate = async (appointmentId: number) => {
+    if (!session?.user) return
+
+    try {
+      // First mark as completed
+      const res = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'COMPLETED', userId: session.user.id })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage('Appointment marked as complete')
+        loadAppointments(session.user.id)
+        // Open rating form
+        setRatingAppointmentId(appointmentId)
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        setError(data.error || 'Failed to mark appointment as complete')
+        setMessage('')
+      }
+    } catch (err) {
+      console.error('Complete appointment error:', err)
+      setError('Failed to mark appointment as complete')
+      setMessage('')
+    }
+  }
+
+  const canComplete = (apt: Appointment) => {
+    if (apt.status !== 'CONFIRMED') return false
+    
+    // Check if appointment end time has passed
+    const appointmentDateTime = new Date(apt.requestedDate)
+    const [hours, minutes] = apt.endTime.split(':').map(Number)
+    appointmentDateTime.setHours(hours, minutes, 0, 0)
+    
+    return appointmentDateTime < new Date()
+  }
+
   const canRate = (apt: Appointment) => {
     if (apt.status !== 'COMPLETED') return false
     
@@ -281,12 +322,22 @@ export default function UserAppointmentsPage() {
                   )}
 
                   <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleCancelAppointment(apt.appointmentId)}
-                      className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
-                    >
-                      {t('appointments.cancelButton')}
-                    </button>
+                    {apt.status === 'CONFIRMED' && canComplete(apt) && (
+                      <button
+                        onClick={() => handleCompleteAndRate(apt.appointmentId)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
+                      >
+                        Complete & Rate
+                      </button>
+                    )}
+                    {apt.status === 'PENDING' || apt.status === 'CONFIRMED' ? (
+                      <button
+                        onClick={() => handleCancelAppointment(apt.appointmentId)}
+                        className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
+                      >
+                        {t('appointments.cancelButton')}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               ))
