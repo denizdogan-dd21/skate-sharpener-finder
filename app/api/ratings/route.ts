@@ -39,9 +39,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Only allow rating COMPLETED appointments
     if (appointment.status !== 'COMPLETED') {
       return NextResponse.json(
         { error: 'Can only rate completed appointments' },
+        { status: 400 }
+      )
+    }
+
+    // Check if appointment date/time has passed
+    const appointmentDateTime = new Date(appointment.requestedDate)
+    const [hours, minutes] = appointment.endTime.split(':').map(Number)
+    appointmentDateTime.setHours(hours, minutes, 0, 0)
+    
+    if (appointmentDateTime > new Date()) {
+      return NextResponse.json(
+        { error: 'Cannot rate appointments that have not occurred yet' },
         { status: 400 }
       )
     }
