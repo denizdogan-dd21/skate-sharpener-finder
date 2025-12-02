@@ -161,10 +161,10 @@ export default function UserAppointmentsPage() {
   const canComplete = (apt: Appointment) => {
     if (apt.status !== 'CONFIRMED') return false
     
-    // Check if appointment end time has passed
-    const appointmentDateTime = new Date(apt.requestedDate)
+    // Parse the date and time, treating them as local timezone
+    const [year, month, day] = apt.requestedDate.split('-').map(Number)
     const [hours, minutes] = apt.endTime.split(':').map(Number)
-    appointmentDateTime.setHours(hours, minutes, 0, 0)
+    const appointmentDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
     
     return appointmentDateTime < new Date()
   }
@@ -172,10 +172,10 @@ export default function UserAppointmentsPage() {
   const canRate = (apt: Appointment) => {
     if (apt.status !== 'COMPLETED') return false
     
-    // Check if appointment date/time has passed
-    const appointmentDateTime = new Date(apt.requestedDate)
+    // Parse the date and time, treating them as local timezone
+    const [year, month, day] = apt.requestedDate.split('-').map(Number)
     const [hours, minutes] = apt.endTime.split(':').map(Number)
-    appointmentDateTime.setHours(hours, minutes, 0, 0)
+    const appointmentDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0)
     
     return appointmentDateTime < new Date()
   }
