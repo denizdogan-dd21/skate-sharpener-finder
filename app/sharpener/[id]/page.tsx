@@ -257,17 +257,34 @@ export default function SharpenerProfilePage() {
                     <div className="space-y-2">
                       {location.availabilities
                         .filter((avail: any) => {
-                          // Calculate total available slots (15-minute intervals)
+                          // Generate all 15-minute slots to check if any are actually free
                           const [startHour, startMin] = avail.startTime.split(':').map(Number)
                           const [endHour, endMin] = avail.endTime.split(':').map(Number)
-                          const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin)
-                          const totalSlots = totalMinutes / 15
+                          const startMinutes = startHour * 60 + startMin
+                          const endMinutes = endHour * 60 + endMin
                           
-                          // Count booked slots
-                          const bookedSlots = (bookedIntervals[avail.availabilityId] || []).length
+                          const bookedIntervalsList = bookedIntervals[avail.availabilityId] || []
                           
-                          // Only show if there are free slots
-                          return bookedSlots < totalSlots
+                          // Generate all slots and check if any are free
+                          for (let minutes = startMinutes; minutes < endMinutes; minutes += 15) {
+                            const slotStartHour = Math.floor(minutes / 60)
+                            const slotStartMin = minutes % 60
+                            const slotEndMinutes = minutes + 15
+                            const slotEndHour = Math.floor(slotEndMinutes / 60)
+                            const slotEndMin = slotEndMinutes % 60
+                            
+                            const slotStart = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMin).padStart(2, '0')}`
+                            const slotEnd = `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMin).padStart(2, '0')}`
+                            const intervalKey = `${slotStart}-${slotEnd}`
+                            
+                            // If we find at least one free slot, show this availability
+                            if (!bookedIntervalsList.includes(intervalKey)) {
+                              return true
+                            }
+                          }
+                          
+                          // No free slots found
+                          return false
                         })
                         .map((avail: any) => {
                           // Calculate min/max time range from free slots
