@@ -269,7 +269,41 @@ export default function SharpenerProfilePage() {
                           // Only show if there are free slots
                           return bookedSlots < totalSlots
                         })
-                        .map((avail: any) => (
+                        .map((avail: any) => {
+                          // Calculate min/max time range from free slots
+                          const [startHour, startMin] = avail.startTime.split(':').map(Number)
+                          const [endHour, endMin] = avail.endTime.split(':').map(Number)
+                          const startMinutes = startHour * 60 + startMin
+                          const endMinutes = endHour * 60 + endMin
+                          
+                          const bookedIntervalsList = bookedIntervals[avail.availabilityId] || []
+                          
+                          // Generate all 15-minute slots
+                          const allSlots = []
+                          for (let minutes = startMinutes; minutes < endMinutes; minutes += 15) {
+                            const slotStartHour = Math.floor(minutes / 60)
+                            const slotStartMin = minutes % 60
+                            const slotEndMinutes = minutes + 15
+                            const slotEndHour = Math.floor(slotEndMinutes / 60)
+                            const slotEndMin = slotEndMinutes % 60
+                            
+                            const slotStart = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMin).padStart(2, '0')}`
+                            const slotEnd = `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMin).padStart(2, '0')}`
+                            
+                            allSlots.push({ start: slotStart, end: slotEnd })
+                          }
+                          
+                          // Filter out booked slots
+                          const freeSlots = allSlots.filter(slot => {
+                            const intervalKey = `${slot.start}-${slot.end}`
+                            return !bookedIntervalsList.includes(intervalKey)
+                          })
+                          
+                          // Calculate display time range from free slots
+                          const displayStartTime = freeSlots.length > 0 ? freeSlots[0].start : avail.startTime
+                          const displayEndTime = freeSlots.length > 0 ? freeSlots[freeSlots.length - 1].end : avail.endTime
+                          
+                          return (
                         <div
                           key={avail.availabilityId}
                           onClick={async () => {
@@ -301,7 +335,7 @@ export default function SharpenerProfilePage() {
                                 })}
                               </p>
                               <p className="text-xs sm:text-sm text-gray-600">
-                                {avail.startTime} - {avail.endTime}
+                                {displayStartTime} - {displayEndTime}
                               </p>
                             </div>
                             <p className="text-base sm:text-lg font-bold text-primary-600">${avail.price}</p>
