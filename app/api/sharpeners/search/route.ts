@@ -151,6 +151,20 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Fetch all appointments to check booked slots
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        status: {
+          in: ['PENDING', 'CONFIRMED']
+        }
+      },
+      select: {
+        availabilityId: true,
+        startTime: true,
+        endTime: true,
+      }
+    })
+
     // Ensure all locations have coordinates and calculate distances
     const locationsWithDistance = await Promise.all(
       locations.map(async (location: any) => {
@@ -166,6 +180,23 @@ export async function GET(request: NextRequest) {
           )
         }
         
+        // Filter out fully booked availabilities
+        const availableSlots = location.availabilities.filter((avail: any) => {
+          // Calculate total available time in 30-minute intervals
+          const [startHour, startMin] = avail.startTime.split(':').map(Number)
+          const [endHour, endMin] = avail.endTime.split(':').map(Number)
+          const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin)
+          const totalSlots = totalMinutes / 30
+          
+          // Count booked slots for this availability
+          const bookedSlots = appointments.filter((apt: any) => 
+            apt.availabilityId === avail.availabilityId
+          ).length
+          
+          // Only include if there are free slots
+          return bookedSlots < totalSlots
+        })
+        
         return {
           sharpenerId: location.sharpener.sharpenerId,
           sharpenerName: `${location.sharpener.firstName} ${location.sharpener.lastName}`,
@@ -180,7 +211,7 @@ export async function GET(request: NextRequest) {
           longitude: location.longitude,
           distance: distance,
           machines: location.machines,
-          upcomingAvailability: location.availabilities,
+          upcomingAvailability: availableSlots,
         }
       })
     )
