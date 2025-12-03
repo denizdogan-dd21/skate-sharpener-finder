@@ -341,7 +341,8 @@ export default function SharpenerProfilePage() {
                             <p className="text-base sm:text-lg font-bold text-primary-600">${avail.price}</p>
                           </div>
                         </div>
-                      ))}
+                      )}
+                    )}
                     </div>
                   </div>
                 )}
