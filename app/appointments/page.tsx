@@ -206,13 +206,13 @@ export default function UserAppointmentsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: any = {
-      PENDING: { bg: 'bg-yellow-500', text: 'Pending' },
-      CONFIRMED: { bg: 'bg-green-500', text: 'Confirmed' },
-      DENIED: { bg: 'bg-red-500', text: 'Denied' },
-      CANCELLED: { bg: 'bg-gray-500', text: 'Cancelled' },
-      COMPLETED: { bg: 'bg-blue-500', text: 'Completed' },
-      RATED: { bg: 'bg-purple-500', text: 'Rated' },
-      NO_SHOW: { bg: 'bg-orange-500', text: 'No Show' }
+      PENDING: { bg: 'bg-yellow-500', text: t('appointments.statuses.PENDING') },
+      CONFIRMED: { bg: 'bg-green-500', text: t('appointments.statuses.CONFIRMED') },
+      DENIED: { bg: 'bg-red-500', text: t('appointments.statuses.DENIED') },
+      CANCELLED: { bg: 'bg-gray-500', text: t('appointments.statuses.CANCELLED') },
+      COMPLETED: { bg: 'bg-blue-500', text: t('appointments.statuses.COMPLETED') },
+      RATED: { bg: 'bg-purple-500', text: t('appointments.statuses.RATED') },
+      NO_SHOW: { bg: 'bg-orange-500', text: t('appointments.statuses.NO_SHOW') }
     }
     const config = statusConfig[status] || { bg: 'bg-gray-500', text: status }
     return (
@@ -261,7 +261,7 @@ export default function UserAppointmentsPage() {
 
         {/* Active Appointments */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Active Appointments</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('appointments.activeTitle')}</h2>
           <div className="space-y-4">
             {activeAppointments.length === 0 ? (
               <div className="card">
@@ -287,7 +287,7 @@ export default function UserAppointmentsPage() {
 
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <p className="text-sm text-gray-600">Date & Time</p>
+                      <p className="text-sm text-gray-600">{t('appointments.dateTime')}</p>
                       <p className="font-semibold text-gray-900">
                         {new Date(apt.requestedDate).toLocaleDateString('en-US', { 
                           weekday: 'long', 
@@ -333,7 +333,7 @@ export default function UserAppointmentsPage() {
                   {apt.status === 'PENDING' && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
                       <p className="text-sm text-yellow-800">
-                        ⏳ Waiting for sharpener to accept your request
+                        {t('appointments.pendingMessage')}
                       </p>
                     </div>
                   )}
@@ -341,7 +341,7 @@ export default function UserAppointmentsPage() {
                   {apt.status === 'CONFIRMED' && (
                     <div className="bg-green-50 border border-green-200 rounded p-3 mb-4">
                       <p className="text-sm text-green-800">
-                        ✓ Your appointment has been confirmed! The sharpener will contact you.
+                        {t('appointments.confirmedMessage')}
                       </p>
                     </div>
                   )}
@@ -352,7 +352,7 @@ export default function UserAppointmentsPage() {
                         onClick={() => handleCompleteAndRate(apt.appointmentId)}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
                       >
-                        Complete & Rate
+                        {t('appointments.completeAndRateButton')}
                       </button>
                     )}
                     {(apt.status === 'PENDING' || apt.status === 'CONFIRMED') && canCancel(apt) && (
@@ -372,11 +372,11 @@ export default function UserAppointmentsPage() {
 
         {/* Past Appointments */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Past Appointments</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('appointments.pastTitle')}</h2>
           <div className="space-y-4">
             {pastAppointments.length === 0 ? (
               <div className="card">
-                <p className="text-gray-500">No past appointments</p>
+                <p className="text-gray-500">{t('appointments.noPastAppointments')}</p>
               </div>
             ) : (
               pastAppointments.map((apt) => (
@@ -399,7 +399,7 @@ export default function UserAppointmentsPage() {
                   {apt.status === 'DENIED' && (
                     <div className="bg-red-50 border border-red-200 rounded p-3 mt-3">
                       <p className="text-sm text-red-800">
-                        This appointment was declined by the sharpener
+                        {t('appointments.deniedMessage')}
                       </p>
                     </div>
                   )}
@@ -408,7 +408,7 @@ export default function UserAppointmentsPage() {
                     <div className="mt-4">
                       {ratingAppointmentId === apt.appointmentId ? (
                         <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                          <h4 className="font-semibold text-gray-900 mb-3">Leave a Rating</h4>
+                          <h4 className="font-semibold text-gray-900 mb-3">{t('appointments.leaveRatingTitle')}</h4>
                           
                           {/* Star Rating */}
                           <div className="flex items-center space-x-2 mb-3">
@@ -422,7 +422,7 @@ export default function UserAppointmentsPage() {
                               </button>
                             ))}
                             <span className="text-sm text-gray-600 ml-2">
-                              {rating > 0 ? `${rating} star${rating > 1 ? 's' : ''}` : 'Select rating'}
+                              {rating > 0 ? `${rating} ${rating > 1 ? t('appointments.starsPlural') : t('appointments.starsSingular')}` : t('appointments.selectRating')}
                             </span>
                           </div>
 
@@ -430,7 +430,7 @@ export default function UserAppointmentsPage() {
                           <textarea
                             className="w-full border border-gray-300 rounded-lg p-2 text-sm mb-3"
                             rows={3}
-                            placeholder="Share your experience (optional)"
+                            placeholder={t('appointments.shareExperience')}
                             value={ratingComment}
                             onChange={(e) => setRatingComment(e.target.value)}
                           />
@@ -441,7 +441,7 @@ export default function UserAppointmentsPage() {
                               onClick={() => handleSubmitRating(apt.appointmentId)}
                               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
                             >
-                              Submit Rating
+                              {t('appointments.submitRatingButton')}
                             </button>
                             <button
                               onClick={() => {
@@ -451,7 +451,7 @@ export default function UserAppointmentsPage() {
                               }}
                               className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
                             >
-                              Cancel
+                              {t('appointments.cancelRatingButton')}
                             </button>
                           </div>
                         </div>
@@ -460,7 +460,7 @@ export default function UserAppointmentsPage() {
                           onClick={() => setRatingAppointmentId(apt.appointmentId)}
                           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
                         >
-                          Leave a Rating
+                          {t('appointments.leaveRatingButton')}
                         </button>
                       )}
                     </div>
