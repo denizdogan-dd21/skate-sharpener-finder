@@ -190,17 +190,17 @@ export async function GET(request: NextRequest) {
               end: apt.endTime
             }))
           
-          // Generate all possible 30-minute slots
+          // Generate all possible 15-minute slots
           const [startHour, startMin] = avail.startTime.split(':').map(Number)
           const [endHour, endMin] = avail.endTime.split(':').map(Number)
           const startMinutes = startHour * 60 + startMin
           const endMinutes = endHour * 60 + endMin
           
           const allSlots = []
-          for (let minutes = startMinutes; minutes < endMinutes; minutes += 30) {
+          for (let minutes = startMinutes; minutes < endMinutes; minutes += 15) {
             const slotStartHour = Math.floor(minutes / 60)
             const slotStartMin = minutes % 60
-            const slotEndMinutes = minutes + 30
+            const slotEndMinutes = minutes + 15
             const slotEndHour = Math.floor(slotEndMinutes / 60)
             const slotEndMin = slotEndMinutes % 60
             

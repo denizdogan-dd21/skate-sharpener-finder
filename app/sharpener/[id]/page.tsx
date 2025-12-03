@@ -257,11 +257,11 @@ export default function SharpenerProfilePage() {
                     <div className="space-y-2">
                       {location.availabilities
                         .filter((avail: any) => {
-                          // Calculate total available slots
+                          // Calculate total available slots (15-minute intervals)
                           const [startHour, startMin] = avail.startTime.split(':').map(Number)
                           const [endHour, endMin] = avail.endTime.split(':').map(Number)
                           const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin)
-                          const totalSlots = totalMinutes / 30
+                          const totalSlots = totalMinutes / 15
                           
                           // Count booked slots
                           const bookedSlots = (bookedIntervals[avail.availabilityId] || []).length
