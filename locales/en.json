@@ -98,7 +98,10 @@
     "reviews": "reviews",
     "viewProfile": "View Profile",
     "listView": "List View",
-    "mapView": "Map View"
+    "mapView": "Map View",
+    "showAll": "Show all sharpeners (even without availability in the next 14 days)",
+    "available14Days": "Available in the next 14 days:",
+    "machines": "Machines:"
   },
   "sharpener": {
     "profile": "Sharpener Profile",
