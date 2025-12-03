@@ -180,22 +180,56 @@ export async function GET(request: NextRequest) {
           )
         }
         
-        // Filter out fully booked availabilities
-        const availableSlots = location.availabilities.filter((avail: any) => {
-          // Calculate total available time in 30-minute intervals
+        // Filter out fully booked availabilities and adjust time ranges to show only available slots
+        const availableSlots = location.availabilities.map((avail: any) => {
+          // Get all booked intervals for this availability
+          const bookedIntervals = appointments
+            .filter((apt: any) => apt.availabilityId === avail.availabilityId)
+            .map((apt: any) => ({
+              start: apt.startTime,
+              end: apt.endTime
+            }))
+          
+          // Generate all possible 30-minute slots
           const [startHour, startMin] = avail.startTime.split(':').map(Number)
           const [endHour, endMin] = avail.endTime.split(':').map(Number)
-          const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin)
-          const totalSlots = totalMinutes / 30
+          const startMinutes = startHour * 60 + startMin
+          const endMinutes = endHour * 60 + endMin
           
-          // Count booked slots for this availability
-          const bookedSlots = appointments.filter((apt: any) => 
-            apt.availabilityId === avail.availabilityId
-          ).length
+          const allSlots = []
+          for (let minutes = startMinutes; minutes < endMinutes; minutes += 30) {
+            const slotStartHour = Math.floor(minutes / 60)
+            const slotStartMin = minutes % 60
+            const slotEndMinutes = minutes + 30
+            const slotEndHour = Math.floor(slotEndMinutes / 60)
+            const slotEndMin = slotEndMinutes % 60
+            
+            const slotStart = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMin).padStart(2, '0')}`
+            const slotEnd = `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMin).padStart(2, '0')}`
+            
+            allSlots.push({ start: slotStart, end: slotEnd })
+          }
           
-          // Only include if there are free slots
-          return bookedSlots < totalSlots
-        })
+          // Filter out booked slots
+          const freeSlots = allSlots.filter(slot => {
+            return !bookedIntervals.some(booked => 
+              booked.start === slot.start && booked.end === slot.end
+            )
+          })
+          
+          // If no free slots, return null
+          if (freeSlots.length === 0) return null
+          
+          // Calculate min/max of free slots
+          const minStartTime = freeSlots[0].start
+          const maxEndTime = freeSlots[freeSlots.length - 1].end
+          
+          return {
+            ...avail,
+            startTime: minStartTime,
+            endTime: maxEndTime
+          }
+        }).filter(Boolean) // Remove null entries (fully booked availabilities)
         
         return {
           sharpenerId: location.sharpener.sharpenerId,
