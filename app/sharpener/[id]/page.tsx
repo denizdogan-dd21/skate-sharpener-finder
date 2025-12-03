@@ -255,7 +255,21 @@ export default function SharpenerProfilePage() {
                   <div className="mt-4">
                     <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-2">{t('sharpener.availability')} ({t('search.results')}):</h4>
                     <div className="space-y-2">
-                      {location.availabilities.map((avail: any) => (
+                      {location.availabilities
+                        .filter((avail: any) => {
+                          // Calculate total available slots
+                          const [startHour, startMin] = avail.startTime.split(':').map(Number)
+                          const [endHour, endMin] = avail.endTime.split(':').map(Number)
+                          const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin)
+                          const totalSlots = totalMinutes / 30
+                          
+                          // Count booked slots
+                          const bookedSlots = (bookedIntervals[avail.availabilityId] || []).length
+                          
+                          // Only show if there are free slots
+                          return bookedSlots < totalSlots
+                        })
+                        .map((avail: any) => (
                         <div
                           key={avail.availabilityId}
                           onClick={async () => {
