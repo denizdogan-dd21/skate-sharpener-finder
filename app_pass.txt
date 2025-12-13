@@ -1,0 +1,5 @@
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=denizdogan@gmail.com
+SMTP_PASSWORD=mfdi pdga itsb bexo
+SMTP_FROM=denizdogan@gmail.com
