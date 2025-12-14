@@ -82,7 +82,8 @@
       "bioPlaceholder": "Tell customers about your experience and services...",
       "submitButton": "Create Account",
       "submitting": "Creating account...",
-      "passwordMismatch": "Passwords do not match"
+      "passwordMismatch": "Passwords do not match",
+      "passwordHint": "At least 8 characters with uppercase, lowercase, and a number"
     }
   },
   "search": {
