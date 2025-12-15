@@ -144,9 +144,12 @@ export default function SearchPage() {
         {searched && !loading && (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              {results.filter(r => showAll || (r.upcomingAvailability && r.upcomingAvailability.length > 0)).length > 0 
-                ? `Found ${results.filter(r => showAll || (r.upcomingAvailability && r.upcomingAvailability.length > 0)).length} sharpener${results.filter(r => showAll || (r.upcomingAvailability && r.upcomingAvailability.length > 0)).length > 1 ? 's' : ''}` 
-                : 'No sharpeners found'}
+              {(() => {
+                const count = results.filter(r => showAll || (r.upcomingAvailability && r.upcomingAvailability.length > 0)).length;
+                if (count === 0) return t('search.noSharpenersFound');
+                if (count === 1) return t('search.foundSharpener');
+                return t('search.foundSharpeners', { count });
+              })()}
             </h2>
             
             {/* Map and Results Grid */}
@@ -166,7 +169,7 @@ export default function SearchPage() {
                         </p>
                         {result.distance !== null && (
                           <div className="mt-2 inline-block bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-semibold">
-                            📍 {result.distance.toFixed(1)} km away
+                            📍 {t('search.kmAway', { distance: result.distance.toFixed(1) })}
                           </div>
                         )}
                       </div>

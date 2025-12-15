@@ -110,14 +110,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch ALL active locations (no filtering by city/state/zipCode)
+    // Exclude locations belonging to suspended or inactive sharpeners
     const locations = await prisma.sharpenerLocation.findMany({
       where: {
-        isActive: true
+        isActive: true,
+        sharpener: {
+          active: true,
+          suspended: false,
+          userType: 'SHARPENER'
+        }
       },
       include: {
         sharpener: {
           select: {
-            sharpenerId: true,
+            userId: true,
             firstName: true,
             lastName: true,
             averageRating: true,
@@ -234,7 +240,7 @@ export async function GET(request: NextRequest) {
         }).filter(Boolean) // Remove null entries (fully booked availabilities)
         
         return {
-          sharpenerId: location.sharpener.sharpenerId,
+          sharpenerId: location.sharpener.userId,
           sharpenerName: `${location.sharpener.firstName} ${location.sharpener.lastName}`,
           averageRating: location.sharpener.averageRating,
           totalRatings: location.sharpener.totalRatings,

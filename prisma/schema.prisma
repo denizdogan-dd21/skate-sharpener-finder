@@ -11,26 +11,17 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  userId           Int           @id @default(autoincrement())
-  email            String        @unique
-  password         String
-  firstName        String
-  lastName         String
-  phone            String
-  isEmailVerified  Boolean       @default(false)
-  createdAt        DateTime      @default(now())
-  
-  appointments     Appointment[]
-  ratings          Rating[]
-
-  @@map("tblUsers")
+enum UserType {
+  CUSTOMER
+  SHARPENER
+  ADMIN
 }
 
-model Sharpener {
-  sharpenerId      Int                    @id @default(autoincrement())
-  email            String                 @unique
+model User {
+  userId           Int                    @id @default(autoincrement())
+  email            String
   password         String
+  userType         UserType
   firstName        String
   lastName         String
   phone            String
@@ -38,13 +29,29 @@ model Sharpener {
   isEmailVerified  Boolean                @default(false)
   averageRating    Float?
   totalRatings     Int                    @default(0)
+  
+  // Account status fields
+  active           Boolean                @default(true)
+  suspended        Boolean                @default(false)
+  suspensionReason String?
+  suspensionEndDate DateTime?
+  
+  // Two-factor authentication fields
+  twoFactorEnabled Boolean                @default(true)
+  twoFactorSecret  String?
+  
   createdAt        DateTime               @default(now())
   
+  // Relations
   locations        SharpenerLocation[]
-  appointments     Appointment[]
-  ratings          Rating[]
+  customerAppointments Appointment[]      @relation("CustomerAppointments")
+  sharpenerAppointments Appointment[]     @relation("SharpenerAppointments")
+  customerRatings  Rating[]               @relation("CustomerRatings")
+  sharpenerRatings Rating[]               @relation("SharpenerRatings")
+  adminActions     AdminAction[]
 
-  @@map("tblSharpeners")
+  @@unique([email, userType])
+  @@map("tblUsers")
 }
 
 model SharpenerLocation {
@@ -60,7 +67,7 @@ model SharpenerLocation {
   isActive         Boolean                @default(true)
   createdAt        DateTime               @default(now())
   
-  sharpener        Sharpener              @relation(fields: [sharpenerId], references: [sharpenerId], onDelete: Cascade)
+  sharpener        User                   @relation(fields: [sharpenerId], references: [userId], onDelete: Cascade)
   machines         SharpeningMachine[]
   availabilities   Availability[]
   appointments     Appointment[]
@@ -123,11 +130,12 @@ model Appointment {
   endTime          String
   status           AppointmentStatus      @default(PENDING)
   notes            String?
+  canceledBy       String?                // 'customer', 'sharpener', or null
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
   
-  user             User                   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  sharpener        Sharpener              @relation(fields: [sharpenerId], references: [sharpenerId], onDelete: Cascade)
+  user             User                   @relation("CustomerAppointments", fields: [userId], references: [userId], onDelete: Cascade)
+  sharpener        User                   @relation("SharpenerAppointments", fields: [sharpenerId], references: [userId], onDelete: Cascade)
   location         SharpenerLocation      @relation(fields: [locationId], references: [locationId], onDelete: Cascade)
   machine          SharpeningMachine      @relation(fields: [machineId], references: [machineId], onDelete: Cascade)
   availability     Availability           @relation(fields: [availabilityId], references: [availabilityId], onDelete: Cascade)
@@ -146,8 +154,8 @@ model Rating {
   createdAt        DateTime               @default(now())
   
   appointment      Appointment            @relation(fields: [appointmentId], references: [appointmentId], onDelete: Cascade)
-  user             User                   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  sharpener        Sharpener              @relation(fields: [sharpenerId], references: [sharpenerId], onDelete: Cascade)
+  user             User                   @relation("CustomerRatings", fields: [userId], references: [userId], onDelete: Cascade)
+  sharpener        User                   @relation("SharpenerRatings", fields: [sharpenerId], references: [userId], onDelete: Cascade)
 
   @@map("tblRatings")
 }
@@ -156,10 +164,44 @@ model EmailVerificationToken {
   tokenId          Int                    @id @default(autoincrement())
   email            String
   token            String                 @unique
-  accountType      String                 // 'user' or 'sharpener'
+  userType         UserType               // CUSTOMER, SHARPENER, or ADMIN
   expiresAt        DateTime
   createdAt        DateTime               @default(now())
 
-  @@unique([email, accountType])
+  @@unique([email, userType])
   @@map("tblEmailVerificationTokens")
+}
+
+model TwoFactorToken {
+  tokenId          String                 @id @default(uuid())
+  email            String
+  userType         UserType
+  token            String                 // 6-digit OTP code
+  expiresAt        DateTime               // Valid for 10 minutes
+  used             Boolean                @default(false)
+  createdAt        DateTime               @default(now())
+
+  @@unique([email, userType, token])
+  @@map("tblTwoFactorTokens")
+}
+
+enum AdminActionType {
+  SUSPEND
+  UNSUSPEND
+  DEACTIVATE
+  ACTIVATE
+}
+
+model AdminAction {
+  actionId         String                 @id @default(uuid())
+  adminId          Int
+  actionType       AdminActionType
+  targetUserId     Int
+  targetUserEmail  String
+  reason           String?
+  createdAt        DateTime               @default(now())
+  
+  admin            User                   @relation(fields: [adminId], references: [userId], onDelete: Cascade)
+
+  @@map("tblAdminActions")
 }

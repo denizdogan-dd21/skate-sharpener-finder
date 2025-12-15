@@ -60,10 +60,22 @@
       "accountType": "Account Type",
       "customer": "Customer",
       "sharpener": "Sharpener",
+      "admin": "Admin",
       "email": "Email address",
       "password": "Password",
       "submitButton": "Sign in",
       "submitting": "Signing in..."
+    },
+    "otp": {
+      "title": "Verify Your Identity",
+      "subtitle": "We sent a verification code to",
+      "enterCode": "Verification Code",
+      "enterSixDigit": "Enter the 6-digit code from your email",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "resendCode": "Resend Code",
+      "resending": "Sending...",
+      "codeSent": "New code sent to your email"
     },
     "register": {
       "title": "Create your account",
@@ -95,6 +107,9 @@
     "searching": "Searching...",
     "results": "Search Results",
     "noResults": "No sharpeners found in this area",
+    "foundSharpeners": "Found {count} sharpeners",
+    "foundSharpener": "Found 1 sharpener",
+    "noSharpenersFound": "No sharpeners found",
     "rating": "Rating",
     "reviews": "reviews",
     "viewProfile": "View Profile",
@@ -102,7 +117,8 @@
     "mapView": "Map View",
     "showAll": "Show all sharpeners (even without availability in the next 14 days)",
     "available14Days": "Available in the next 14 days:",
-    "machines": "Machines:"
+    "machines": "Machines:",
+    "kmAway": "{distance} km away"
   },
   "sharpener": {
     "profile": "Sharpener Profile",
