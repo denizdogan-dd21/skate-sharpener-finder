@@ -188,7 +188,7 @@ export async function GET(request: NextRequest) {
           email: null,
         },
         sharpener: {
-          sharpenerId: apt.sharpener.sharpenerId,
+          userId: apt.sharpener.userId,
           firstName: apt.sharpener.firstName,
           lastName: apt.sharpener.lastName,
           phone: isConfirmed ? apt.sharpener.phone : null, // Hidden until confirmed

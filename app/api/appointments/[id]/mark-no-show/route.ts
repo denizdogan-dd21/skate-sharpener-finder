@@ -36,7 +36,7 @@ export async function POST(
     }
 
     // Verify the sharpener owns this appointment
-    if (appointment.sharpenerId !== session.user.id) {
+    if (appointment.sharpener.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 403 }
