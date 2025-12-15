@@ -65,6 +65,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if this device is trusted (has valid device_trusted cookie)
+    const deviceToken = request.cookies.get('device_trusted')?.value
+    let skipOTP = false
+    
+    if (deviceToken) {
+      try {
+        const decoded = Buffer.from(deviceToken, 'base64').toString('utf-8')
+        const [cookieEmail, cookieUserType, timestamp] = decoded.split(':')
+        
+        // Verify cookie matches current login and is not expired (30 days)
+        const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000
+        if (cookieEmail === email && 
+            cookieUserType === userType && 
+            Date.now() - parseInt(timestamp) < thirtyDaysInMs) {
+          skipOTP = true
+        }
+      } catch (e) {
+        // Invalid cookie format, proceed with OTP
+      }
+    }
+
+    if (skipOTP) {
+      // Device is trusted, skip 2FA
+      return NextResponse.json({
+        success: true,
+        message: 'Login successful',
+        requiresOTP: false,
+        email,
+        userType,
+        userId: user.userId,
+      })
+    }
+
     // Generate and send OTP
     const otpSent = await createAndSendOTP(email, userType)
     if (!otpSent) {

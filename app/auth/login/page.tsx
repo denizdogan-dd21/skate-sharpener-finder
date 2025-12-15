@@ -55,9 +55,30 @@ export default function LoginPage() {
         console.log('Redirecting to OTP verification')
         router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}&userType=${data.userType}`)
       } else {
-        console.log('No OTP required - unexpected')
-        setError('Unexpected response from server')
-        setLoading(false)
+        // Device is trusted, sign in directly
+        const signInResult = await signIn('credentials', {
+          email: data.email,
+          password: 'verified',
+          accountType: accountType,
+          skipPasswordCheck: 'true',
+          redirect: false,
+        })
+
+        if (signInResult?.error) {
+          setError('Failed to create session')
+          setLoading(false)
+          return
+        }
+
+        // Redirect based on account type
+        if (accountType === 'admin') {
+          router.push('/admin/dashboard')
+        } else if (accountType === 'sharpener') {
+          router.push('/dashboard')
+        } else {
+          router.push('/search')
+        }
+        router.refresh()
       }
     } catch (err) {
       console.error('Login error:', err)

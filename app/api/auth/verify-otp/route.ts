@@ -71,13 +71,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Return success - the client will handle creating the session
-    return NextResponse.json({
+    // Set a secure cookie to remember this device for 30 days
+    const response = NextResponse.json({
       success: true,
       userId: user.userId,
       email: user.email,
       userType: user.userType,
     })
+
+    // Create a device token (combination of email and userType)
+    const deviceToken = Buffer.from(`${email}:${userType}:${Date.now()}`).toString('base64')
+    
+    response.cookies.set('device_trusted', deviceToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      path: '/',
+    })
+
+    return response
   } catch (error) {
     console.error('OTP verification error:', error)
     return NextResponse.json(
