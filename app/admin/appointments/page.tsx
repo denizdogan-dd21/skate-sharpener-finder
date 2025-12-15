@@ -8,7 +8,7 @@ interface Appointment {
   appointmentDate: Date
   status: string
   createdAt: Date
-  customer: {
+  user: {
     userId: number
     firstName: string
     lastName: string
@@ -146,9 +146,9 @@ export default function AdminAppointmentsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {apt.customer.firstName} {apt.customer.lastName}
+                          {apt.user.firstName} {apt.user.lastName}
                         </div>
-                        <div className="text-sm text-gray-500">{apt.customer.email}</div>
+                        <div className="text-sm text-gray-500">{apt.user.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">

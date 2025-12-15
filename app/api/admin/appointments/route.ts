@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       prisma.appointment.findMany({
         where,
         include: {
-          customer: {
+          user: {
             select: {
               userId: true,
               firstName: true,
