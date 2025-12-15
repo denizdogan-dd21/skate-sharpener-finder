@@ -19,10 +19,8 @@ interface Sharpener {
   bio: string | null
   createdAt: Date
   locations: any[]
-  machines: any[]
   sharpenerAppointments: any[]
-  receivedRatings: any[]
-  availabilities: any[]
+  sharpenerRatings: any[]
 }
 
 interface Stats {
