@@ -49,7 +49,10 @@ export async function GET(request: NextRequest) {
             select: {
               locationId: true,
               locationName: true,
-              address: true,
+              streetAddress: true,
+              city: true,
+              state: true,
+              zipCode: true,
             },
           },
         },

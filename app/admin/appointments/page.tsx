@@ -155,7 +155,7 @@ export default function AdminAppointmentsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">{apt.location.locationName}</div>
-                        <div className="text-sm text-gray-500">{apt.location.address}</div>
+                        <div className="text-sm text-gray-500">{apt.location.streetAddress}, {apt.location.city}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(apt.appointmentDate).toLocaleString()}
