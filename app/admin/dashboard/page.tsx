@@ -168,20 +168,22 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Coming Soon Notice */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            🚧 Admin Features In Development
+        {/* Admin Features */}
+        <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-green-900 mb-2">
+            ✅ Available Admin Features
           </h3>
-          <p className="text-blue-800 mb-3">
-            The following features are planned and will be available soon:
+          <p className="text-green-800 mb-3">
+            All core admin features are now available:
           </p>
-          <ul className="list-disc list-inside text-blue-800 space-y-1">
-            <li>User management (suspend, deactivate, view details)</li>
-            <li>Sharpener management with statistics</li>
-            <li>Appointment management and oversight</li>
-            <li>No-show tracking for sharpeners</li>
-            <li>Account status filters and search</li>
+          <ul className="list-disc list-inside text-green-800 space-y-1">
+            <li>User management - View, suspend, unsuspend, activate, and deactivate accounts</li>
+            <li>Sharpener management - Complete oversight with locations, machines, appointments, and ratings</li>
+            <li>Appointment management - View all appointments with status filters</li>
+            <li>No-show tracking - Sharpeners can mark appointments as no-show</li>
+            <li>Account status filters - Filter by active, suspended, or inactive accounts</li>
+            <li>Audit logging - All admin actions are logged in the database</li>
+            <li>Two-factor authentication - Email-based OTP with device trust for 180 days</li>
           </ul>
         </div>
       </div>
