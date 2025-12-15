@@ -47,7 +47,7 @@ export async function GET(
         data: {
           appointmentId: appointment.appointmentId,
           userId: appointment.userId,
-          sharpenerId: appointment.sharpenerId,
+          sharpenerId: appointment.sharpener.userId,
           rating: 0,
           comment: '',
         }

@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
           data: {
             appointmentId: apt.appointmentId,
             userId: apt.userId,
-            sharpenerId: apt.sharpenerId,
+            sharpenerId: apt.sharpener.userId,
             rating: 0,
             comment: '',
           }

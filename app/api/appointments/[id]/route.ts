@@ -54,7 +54,7 @@ export async function GET(
         phone: null,
       },
       sharpener: {
-        sharpenerId: appointment.sharpener.sharpenerId,
+        userId: appointment.sharpener.userId,
         firstName: appointment.sharpener.firstName,
         lastName: appointment.sharpener.lastName,
         email: appointment.sharpener.email,
@@ -127,7 +127,7 @@ export async function PATCH(
     // Authorization check
     // Sharpeners can confirm/deny, users can cancel
     if ((status === 'CONFIRMED' || status === 'DENIED') && 
-        appointment.sharpenerId !== sharpenerId) {
+        appointment.sharpener.userId !== sharpenerId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 403 }
@@ -234,7 +234,7 @@ export async function PATCH(
           data: {
             appointmentId: appointment.appointmentId,
             userId: appointment.userId,
-            sharpenerId: appointment.sharpenerId,
+            sharpenerId: appointment.sharpener.userId,
             rating: 0, // Placeholder
             comment: '',
           }
