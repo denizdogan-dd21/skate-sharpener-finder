@@ -23,7 +23,10 @@ interface Appointment {
   location: {
     locationId: number
     locationName: string
-    address: string
+    streetAddress: string
+    city: string
+    state: string
+    zipCode: string
   }
 }
 
