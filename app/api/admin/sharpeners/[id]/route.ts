@@ -25,7 +25,7 @@ export async function GET(
         machines: true,
         sharpenerAppointments: {
           include: {
-            customer: {
+            user: {
               select: {
                 firstName: true,
                 lastName: true,
@@ -45,7 +45,7 @@ export async function GET(
         },
         receivedRatings: {
           include: {
-            customer: {
+            user: {
               select: {
                 firstName: true,
                 lastName: true,
