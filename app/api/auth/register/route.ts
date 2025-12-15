@@ -86,9 +86,9 @@ export async function POST(request: NextRequest) {
     const token = randomUUID()
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
-    // Delete any existing tokens for this email/accountType
+    // Delete any existing tokens for this email/userType
     await prisma.emailVerificationToken.deleteMany({
-      where: { email, accountType }
+      where: { email, userType }
     })
 
     // Create new verification token
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       data: {
         email,
         token,
-        accountType,
+        userType,
         expiresAt,
       }
     })
