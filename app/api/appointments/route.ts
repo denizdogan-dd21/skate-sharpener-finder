@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
         },
         sharpener: {
           select: {
-            sharpenerId: true,
+            userId: true,
             firstName: true,
             lastName: true,
             phone: true,
