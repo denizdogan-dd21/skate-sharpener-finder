@@ -310,7 +310,7 @@ export default function SharpenerDetailsPage() {
                   <div className="flex justify-between">
                     <div>
                       <p className="font-semibold">
-                        {apt.customer.firstName} {apt.customer.lastName}
+                        {apt.user.firstName} {apt.user.lastName}
                       </p>
                       <p className="text-sm text-gray-600">{apt.location.locationName}</p>
                       <p className="text-sm text-gray-500">
@@ -353,7 +353,7 @@ export default function SharpenerDetailsPage() {
                   <div className="flex justify-between">
                     <div>
                       <p className="font-semibold">
-                        {rating.customer.firstName} {rating.customer.lastName}
+                        {rating.user.firstName} {rating.user.lastName}
                       </p>
                       {rating.comment && (
                         <p className="text-sm text-gray-600 mt-1">{rating.comment}</p>
