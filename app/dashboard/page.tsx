@@ -149,18 +149,34 @@ function DashboardContent() {
     if (!session?.user) return
     
     try {
-      const res = await fetch(`/api/appointments/${appointmentId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, sharpenerId: session.user.id })
-      })
+      // Use dedicated endpoint for NO_SHOW
+      if (status === 'NO_SHOW') {
+        const res = await fetch(`/api/appointments/${appointmentId}/mark-no-show`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
 
-      const data = await res.json()
-      if (res.ok) {
-        setMessage(`Appointment ${status.toLowerCase()} successfully!`)
-        loadAppointments(session.user.id)
+        const data = await res.json()
+        if (res.ok) {
+          setMessage('Appointment marked as no-show successfully!')
+          loadAppointments(session.user.id)
+        } else {
+          setError(data.error || 'Failed to mark appointment as no-show')
+        }
       } else {
-        setError(data.error || 'Failed to update appointment')
+        const res = await fetch(`/api/appointments/${appointmentId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, sharpenerId: session.user.id })
+        })
+
+        const data = await res.json()
+        if (res.ok) {
+          setMessage(`Appointment ${status.toLowerCase()} successfully!`)
+          loadAppointments(session.user.id)
+        } else {
+          setError(data.error || 'Failed to update appointment')
+        }
       }
     } catch (err) {
       setError('An error occurred')

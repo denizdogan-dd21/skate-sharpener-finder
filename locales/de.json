@@ -60,10 +60,22 @@
       "accountType": "Kontotyp",
       "customer": "Kunde",
       "sharpener": "Schleifer",
+      "admin": "Administrator",
       "email": "E-Mail-Adresse",
       "password": "Passwort",
       "submitButton": "Anmelden",
       "submitting": "Anmeldung läuft..."
+    },
+    "otp": {
+      "title": "Identität bestätigen",
+      "subtitle": "Wir haben einen Bestätigungscode gesendet an",
+      "enterCode": "Bestätigungscode",
+      "enterSixDigit": "Geben Sie den 6-stelligen Code aus Ihrer E-Mail ein",
+      "verify": "Bestätigen",
+      "verifying": "Wird bestätigt...",
+      "resendCode": "Code erneut senden",
+      "resending": "Wird gesendet...",
+      "codeSent": "Neuer Code wurde an Ihre E-Mail gesendet"
     },
     "register": {
       "title": "Erstellen Sie Ihr Konto",
@@ -95,6 +107,9 @@
     "searching": "Suche läuft...",
     "results": "Suchergebnisse",
     "noResults": "Keine Schleifer in dieser Region gefunden",
+    "foundSharpeners": "{count} Schleifer gefunden",
+    "foundSharpener": "1 Schleifer gefunden",
+    "noSharpenersFound": "Keine Schleifer gefunden",
     "rating": "Bewertung",
     "reviews": "Bewertungen",
     "viewProfile": "Profil ansehen",
@@ -102,7 +117,8 @@
     "mapView": "Kartenansicht",
     "showAll": "Alle Schleifer anzeigen (auch ohne Verfügbarkeit in den nächsten 14 Tagen)",
     "available14Days": "Verfügbar in den nächsten 14 Tagen:",
-    "machines": "Maschinen:"
+    "machines": "Maschinen:",
+    "kmAway": "{distance} km entfernt"
   },
   "sharpener": {
     "profile": "Schleifer-Profil",

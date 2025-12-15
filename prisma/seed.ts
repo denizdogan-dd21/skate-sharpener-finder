@@ -13,13 +13,27 @@ async function main() {
   await prisma.sharpeningMachine.deleteMany()
   await prisma.sharpenerLocation.deleteMany()
   await prisma.user.deleteMany()
-  await prisma.sharpener.deleteMany()
 
-  // Create users
+  // Create admin user
+  const admin = await prisma.user.create({
+    data: {
+      email: 'denizdogan@gmail.com',
+      password: await bcrypt.hash('Sharpener123', 12),
+      userType: 'ADMIN',
+      firstName: 'Deniz',
+      lastName: 'Dogan',
+      phone: '+1 555 000 0000',
+      isEmailVerified: true,
+      twoFactorEnabled: true,
+    }
+  })
+
+  // Create customer users
   const user1 = await prisma.user.create({
     data: {
       email: 'jane.user@example.com',
       password: await bcrypt.hash('Password123', 12),
+      userType: 'CUSTOMER',
       firstName: 'Jane',
       lastName: 'Doe',
       phone: '+1 617 555 0100',
@@ -31,6 +45,7 @@ async function main() {
     data: {
       email: 'john.customer@example.com',
       password: await bcrypt.hash('Password123', 12),
+      userType: 'CUSTOMER',
       firstName: 'John',
       lastName: 'Smith',
       phone: '+1 617 555 0101',
@@ -38,11 +53,12 @@ async function main() {
     }
   })
 
-  // Create sharpeners
-  const sharpener1 = await prisma.sharpener.create({
+  // Create sharpener users
+  const sharpener1 = await prisma.user.create({
     data: {
       email: 'john.sharpener@example.com',
       password: await bcrypt.hash('Password123', 12),
+      userType: 'SHARPENER',
       firstName: 'John',
       lastName: 'Blade',
       phone: '+1 617 555 0200',
@@ -51,10 +67,11 @@ async function main() {
     }
   })
 
-  const sharpener2 = await prisma.sharpener.create({
+  const sharpener2 = await prisma.user.create({
     data: {
       email: 'sarah.sharpener@example.com',
       password: await bcrypt.hash('Password123', 12),
+      userType: 'SHARPENER',
       firstName: 'Sarah',
       lastName: 'Edge',
       phone: '+1 617 555 0201',
@@ -66,7 +83,7 @@ async function main() {
   // Create locations for sharpener 1
   const location1 = await prisma.sharpenerLocation.create({
     data: {
-      sharpenerId: sharpener1.sharpenerId,
+      sharpenerId: sharpener1.userId,
       locationName: "Blade Master Pro Shop",
       streetAddress: "123 Main Street",
       city: "Boston",
@@ -77,7 +94,7 @@ async function main() {
 
   const location2 = await prisma.sharpenerLocation.create({
     data: {
-      sharpenerId: sharpener2.sharpenerId,
+      sharpenerId: sharpener2.userId,
       locationName: "Edge Masters",
       streetAddress: "456 Oak Avenue",
       city: "Cambridge",
@@ -164,7 +181,7 @@ async function main() {
   const appointment1 = await prisma.appointment.create({
     data: {
       userId: user1.userId,
-      sharpenerId: sharpener1.sharpenerId,
+      sharpenerId: sharpener1.userId,
       locationId: location1.locationId,
       machineId: machine1.machineId,
       availabilityId: availabilities[0].availabilityId,
@@ -181,15 +198,15 @@ async function main() {
     data: {
       appointmentId: appointment1.appointmentId,
       userId: user1.userId,
-      sharpenerId: sharpener1.sharpenerId,
+      sharpenerId: sharpener1.userId,
       rating: 5,
       comment: 'Excellent service! My skates have never felt better.',
     }
   })
 
   // Update sharpener's average rating
-  await prisma.sharpener.update({
-    where: { sharpenerId: sharpener1.sharpenerId },
+  await prisma.user.update({
+    where: { userId: sharpener1.userId },
     data: {
       averageRating: 5.0,
       totalRatings: 1,
@@ -200,7 +217,7 @@ async function main() {
   const appointment2 = await prisma.appointment.create({
     data: {
       userId: user2.userId,
-      sharpenerId: sharpener2.sharpenerId,
+      sharpenerId: sharpener2.userId,
       locationId: location2.locationId,
       machineId: machine3.machineId,
       availabilityId: availabilities[10].availabilityId,
@@ -217,7 +234,7 @@ async function main() {
     data: {
       appointmentId: appointment2.appointmentId,
       userId: user2.userId,
-      sharpenerId: sharpener2.sharpenerId,
+      sharpenerId: sharpener2.userId,
       rating: 0,
       comment: '',
     }
@@ -225,8 +242,9 @@ async function main() {
 
   console.log('Seed completed successfully!')
   console.log('\nSample accounts:')
-  console.log('User: jane.user@example.com / Password123')
-  console.log('User: john.customer@example.com / Password123')
+  console.log('Admin: denizdogan@gmail.com / Sharpener123')
+  console.log('Customer: jane.user@example.com / Password123')
+  console.log('Customer: john.customer@example.com / Password123')
   console.log('Sharpener: john.sharpener@example.com / Password123')
   console.log('Sharpener: sarah.sharpener@example.com / Password123')
 }

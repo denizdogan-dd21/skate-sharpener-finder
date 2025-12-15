@@ -225,3 +225,23 @@ export async function sendVerificationEmail(data: VerificationEmailData) {
     throw error
   }
 }
+
+/**
+ * Generic email sending function
+ */
+export async function sendEmail(to: string, subject: string, html: string) {
+  const mailOptions = {
+    from: process.env.SMTP_FROM,
+    to,
+    subject,
+    html,
+  }
+
+  try {
+    await transporter.sendMail(mailOptions)
+    console.log('Email sent to:', to)
+  } catch (error) {
+    console.error('Error sending email:', error)
+    throw error
+  }
+}

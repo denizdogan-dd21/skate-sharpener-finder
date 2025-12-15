@@ -88,6 +88,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                         {t('nav.dashboard')}
                       </Link>
                     )}
+                    {user.accountType === 'admin' && (
+                      <Link href="/admin/dashboard" className="text-gray-700 hover:text-primary-600 font-medium">
+                        Admin
+                      </Link>
+                    )}
                     <span className="text-gray-600">
                       {user.firstName} {user.lastName}
                     </span>
@@ -141,6 +146,15 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           {t('nav.dashboard')}
+                        </Link>
+                      )}
+                      {user.accountType === 'admin' && (
+                        <Link 
+                          href="/admin/dashboard" 
+                          className="text-gray-700 hover:text-primary-600 font-medium px-4 py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Admin
                         </Link>
                       )}
                       <div className="text-gray-600 px-4 py-2">

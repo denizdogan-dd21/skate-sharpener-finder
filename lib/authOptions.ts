@@ -1,8 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
-import { verifyPassword, validateEmail } from '@/lib/auth'
-import type { User, Sharpener } from '@/types'
+import { UserType } from '@prisma/client'
 
 declare module 'next-auth' {
   interface Session {
@@ -12,7 +11,8 @@ declare module 'next-auth' {
       firstName: string
       lastName: string
       phone: string
-      accountType: 'user' | 'sharpener'
+      accountType: 'user' | 'sharpener' | 'admin'
+      userType: UserType
     }
   }
 
@@ -22,14 +22,16 @@ declare module 'next-auth' {
     firstName: string
     lastName: string
     phone: string
-    accountType: 'user' | 'sharpener'
+    accountType: 'user' | 'sharpener' | 'admin'
+    userType: UserType
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     id: number
-    accountType: 'user' | 'sharpener'
+    accountType: 'user' | 'sharpener' | 'admin'
+    userType: UserType
     firstName: string
     lastName: string
     phone: string
@@ -45,38 +47,40 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
         accountType: { label: 'Account Type', type: 'text' },
+        skipPasswordCheck: { label: 'Skip Password Check', type: 'text' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password || !credentials?.accountType) {
+        if (!credentials?.email || !credentials?.accountType) {
           throw new Error('Missing credentials')
         }
 
-        if (!validateEmail(credentials.email)) {
-          throw new Error('Invalid email format')
-        }
-
-        if (credentials.accountType !== 'user' && credentials.accountType !== 'sharpener') {
+        // Map accountType to UserType
+        let userType: UserType
+        if (credentials.accountType === 'user') {
+          userType = 'CUSTOMER'
+        } else if (credentials.accountType === 'sharpener') {
+          userType = 'SHARPENER'
+        } else if (credentials.accountType === 'admin') {
+          userType = 'ADMIN'
+        } else {
           throw new Error('Invalid account type')
         }
 
         try {
-          if (credentials.accountType === 'user') {
+          // If skipPasswordCheck is set, it means OTP was already verified
+          // Just fetch the user and create session
+          if (credentials.skipPasswordCheck === 'true') {
             const user = await prisma.user.findUnique({
-              where: { email: credentials.email },
+              where: {
+                email_userType: {
+                  email: credentials.email,
+                  userType,
+                },
+              },
             })
 
             if (!user) {
-              throw new Error('Invalid credentials')
-            }
-
-            const isPasswordValid = await verifyPassword(credentials.password, user.password)
-            if (!isPasswordValid) {
-              throw new Error('Invalid credentials')
-            }
-
-            // Check if email is verified
-            if (!user.isEmailVerified) {
-              throw new Error('Please verify your email before logging in. Check your inbox for the verification link.')
+              throw new Error('User not found')
             }
 
             return {
@@ -85,36 +89,13 @@ export const authOptions: NextAuthOptions = {
               firstName: user.firstName,
               lastName: user.lastName,
               phone: user.phone,
-              accountType: 'user' as const,
-            }
-          } else {
-            const sharpener = await prisma.sharpener.findUnique({
-              where: { email: credentials.email },
-            })
-
-            if (!sharpener) {
-              throw new Error('Invalid credentials')
-            }
-
-            const isPasswordValid = await verifyPassword(credentials.password, sharpener.password)
-            if (!isPasswordValid) {
-              throw new Error('Invalid credentials')
-            }
-
-            // Check if email is verified
-            if (!sharpener.isEmailVerified) {
-              throw new Error('Please verify your email before logging in. Check your inbox for the verification link.')
-            }
-
-            return {
-              id: sharpener.sharpenerId,
-              email: sharpener.email,
-              firstName: sharpener.firstName,
-              lastName: sharpener.lastName,
-              phone: sharpener.phone,
-              accountType: 'sharpener' as const,
+              accountType: credentials.accountType as 'user' | 'sharpener' | 'admin',
+              userType: user.userType,
             }
           }
+
+          // This shouldn't happen in the new flow, but keeping for backward compatibility
+          throw new Error('Please use the login page')
         } catch (error) {
           console.error('Authorization error:', error)
           throw error
@@ -127,6 +108,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id as number
         token.accountType = user.accountType
+        token.userType = user.userType
         token.firstName = user.firstName
         token.lastName = user.lastName
         token.phone = user.phone
@@ -142,6 +124,7 @@ export const authOptions: NextAuthOptions = {
           lastName: token.lastName,
           phone: token.phone,
           accountType: token.accountType,
+          userType: token.userType,
         }
       }
       return session

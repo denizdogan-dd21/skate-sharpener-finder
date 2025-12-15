@@ -19,15 +19,20 @@ export async function GET(
     const now = new Date()
     const fourteenDaysFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
     
-    const sharpener = await prisma.sharpener.findUnique({
-      where: { sharpenerId },
+    const sharpener = await prisma.user.findUnique({
+      where: { 
+        userId: sharpenerId,
+      },
       select: {
-        sharpenerId: true,
+        userId: true,
         firstName: true,
         lastName: true,
         bio: true,
         averageRating: true,
         totalRatings: true,
+        active: true,
+        suspended: true,
+        userType: true,
         locations: {
           where: { isActive: true },
           include: {
@@ -47,13 +52,13 @@ export async function GET(
             }
           }
         },
-        ratings: {
+        receivedRatings: {
           orderBy: {
             createdAt: 'desc'
           },
           take: 10,
           include: {
-            user: {
+            customer: {
               select: {
                 firstName: true,
                 lastName: true,
@@ -67,6 +72,14 @@ export async function GET(
     if (!sharpener) {
       return NextResponse.json(
         { error: 'Sharpener not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if sharpener is suspended or inactive
+    if (sharpener.userType !== 'SHARPENER' || !sharpener.active || sharpener.suspended) {
+      return NextResponse.json(
+        { error: 'Sharpener profile is not available' },
         { status: 404 }
       )
     }
@@ -154,7 +167,7 @@ export async function GET(
 
     // Format response
     const response = {
-      sharpenerId: sharpener.sharpenerId,
+      sharpenerId: sharpener.userId,
       name: `${sharpener.firstName} ${sharpener.lastName}`,
       bio: sharpener.bio,
       averageRating: sharpener.averageRating,
@@ -168,11 +181,11 @@ export async function GET(
         machines: location.machines,
         availabilities: location.availabilities.map(adjustAvailabilityTimes).filter(avail => avail.startTime < avail.endTime),
       })),
-      recentReviews: sharpener.ratings.map(rating => ({
+      recentReviews: sharpener.receivedRatings.map(rating => ({
         ratingId: rating.ratingId,
         rating: rating.rating,
         comment: rating.comment,
-        userName: `${rating.user.firstName} ${rating.user.lastName}`,
+        userName: `${rating.customer.firstName} ${rating.customer.lastName}`,
         createdAt: rating.createdAt,
       }))
     }

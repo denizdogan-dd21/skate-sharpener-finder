@@ -3,9 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import type { LoginFormData } from '@/types'
+
+type AccountType = 'user' | 'sharpener' | 'admin'
+
+interface LoginFormData {
+  email: string
+  password: string
+  accountType: AccountType
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -24,27 +30,37 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const result = await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
-        accountType: formData.accountType,
-        redirect: false,
+      console.log('Submitting login with:', { email: formData.email, accountType: formData.accountType })
+      
+      // Call login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       })
 
-      if (result?.error) {
-        setError(result.error)
+      console.log('Login response status:', response.status)
+      
+      const data = await response.json()
+      console.log('Login response data:', data)
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed')
         setLoading(false)
         return
       }
 
-      // Redirect based on account type
-      if (formData.accountType === 'sharpener') {
-        router.push('/dashboard')
+      // If OTP is required, redirect to verification page
+      if (data.requiresOTP) {
+        console.log('Redirecting to OTP verification')
+        router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}&userType=${data.userType}`)
       } else {
-        router.push('/search')
+        console.log('No OTP required - unexpected')
+        setError('Unexpected response from server')
+        setLoading(false)
       }
-      router.refresh()
     } catch (err) {
+      console.error('Login error:', err)
       setError('An error occurred. Please try again.')
       setLoading(false)
     }
@@ -89,7 +105,7 @@ export default function LoginPage() {
                     name="accountType"
                     value="user"
                     checked={formData.accountType === 'user'}
-                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
+                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as AccountType })}
                     className="mr-2"
                   />
                   <span className="text-gray-900">{t('auth.login.customer')}</span>
@@ -100,10 +116,21 @@ export default function LoginPage() {
                     name="accountType"
                     value="sharpener"
                     checked={formData.accountType === 'sharpener'}
-                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as 'user' | 'sharpener' })}
+                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as AccountType })}
                     className="mr-2"
                   />
                   <span className="text-gray-900">{t('auth.login.sharpener')}</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="accountType"
+                    value="admin"
+                    checked={formData.accountType === 'admin'}
+                    onChange={(e) => setFormData({ ...formData, accountType: e.target.value as AccountType })}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-900">{t('auth.login.admin')}</span>
                 </label>
               </div>
             </div>
