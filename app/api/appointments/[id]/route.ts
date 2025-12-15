@@ -127,7 +127,7 @@ export async function PATCH(
     // Authorization check
     // Sharpeners can confirm/deny, users can cancel
     if ((status === 'CONFIRMED' || status === 'DENIED') && 
-        appointment.sharpener.userId !== sharpenerId) {
+        appointment.sharpenerId !== sharpenerId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 403 }
@@ -234,7 +234,7 @@ export async function PATCH(
           data: {
             appointmentId: appointment.appointmentId,
             userId: appointment.userId,
-            sharpenerId: appointment.sharpener.userId,
+            sharpenerId: appointment.sharpenerId,
             rating: 0, // Placeholder
             comment: '',
           }
