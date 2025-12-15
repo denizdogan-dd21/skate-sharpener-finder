@@ -74,11 +74,11 @@ export async function POST(request: NextRequest) {
         const decoded = Buffer.from(deviceToken, 'base64').toString('utf-8')
         const [cookieEmail, cookieUserType, timestamp] = decoded.split(':')
         
-        // Verify cookie matches current login and is not expired (30 days)
-        const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000
+        // Verify cookie matches current login and is not expired (180 days)
+        const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000
         if (cookieEmail === email && 
             cookieUserType === userType && 
-            Date.now() - parseInt(timestamp) < thirtyDaysInMs) {
+            Date.now() - parseInt(timestamp) < oneEightyDaysInMs) {
           skipOTP = true
         }
       } catch (e) {
