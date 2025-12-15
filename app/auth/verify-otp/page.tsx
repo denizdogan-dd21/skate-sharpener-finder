@@ -133,6 +133,12 @@ function VerifyOTPContent() {
           <p className="mt-2 text-gray-600">
             {t('auth.otp.subtitle')} <strong>{email}</strong>
           </p>
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <span className="font-medium">✓ One-time verification:</span> After you verify this code, 
+              you won't need to enter a code again on this device for 30 days.
+            </p>
+          </div>
         </div>
 
         <div className="card">
