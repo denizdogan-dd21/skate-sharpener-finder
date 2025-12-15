@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
           _count: {
             select: {
               sharpenerAppointments: true,
-              receivedRatings: true,
+              sharpenerRatings: true,
               locations: true,
             },
           },

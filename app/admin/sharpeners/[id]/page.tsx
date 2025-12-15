@@ -282,15 +282,18 @@ export default function SharpenerDetailsPage() {
           {/* Machines */}
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-4">Machines</h2>
-            {sharpener.machines.length === 0 ? (
+            {sharpener.locations.flatMap((loc: any) => loc.machines).length === 0 ? (
               <p className="text-gray-500">No machines</p>
             ) : (
               <div className="space-y-3">
-                {sharpener.machines.map((machine: any) => (
+                {sharpener.locations.flatMap((loc: any) => loc.machines.map((machine: any) => ({
+                  ...machine,
+                  locationName: loc.locationName
+                }))).map((machine: any) => (
                   <div key={machine.machineId} className="border-l-4 border-green-500 pl-4 py-2">
-                    <p className="font-semibold">{machine.machineName}</p>
-                    <p className="text-sm text-gray-600">{machine.machineType}</p>
-                    <p className="text-sm text-gray-500">{machine.brand} - {machine.model}</p>
+                    <p className="font-semibold">{machine.machineType}</p>
+                    <p className="text-sm text-gray-600">Location: {machine.locationName}</p>
+                    <p className="text-sm text-gray-500">Radius Options: {machine.radiusOptions}</p>
                   </div>
                 ))}
               </div>
@@ -344,11 +347,11 @@ export default function SharpenerDetailsPage() {
         {/* Ratings */}
         <div className="bg-white shadow rounded-lg p-6 mt-6">
           <h2 className="text-2xl font-bold mb-4">Recent Ratings</h2>
-          {sharpener.receivedRatings.length === 0 ? (
+          {sharpener.sharpenerRatings.length === 0 ? (
             <p className="text-gray-500">No ratings yet</p>
           ) : (
             <div className="space-y-4">
-              {sharpener.receivedRatings.map((rating: any) => (
+              {sharpener.sharpenerRatings.map((rating: any) => (
                 <div key={rating.ratingId} className="border-l-4 border-yellow-500 pl-4 py-2">
                   <div className="flex justify-between">
                     <div>

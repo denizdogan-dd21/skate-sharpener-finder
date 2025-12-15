@@ -18,7 +18,7 @@ interface Sharpener {
   createdAt: Date
   _count: {
     sharpenerAppointments: number
-    receivedRatings: number
+    sharpenerRatings: number
     locations: number
   }
 }

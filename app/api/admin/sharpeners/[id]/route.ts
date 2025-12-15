@@ -15,6 +15,13 @@ export async function GET(
       include: {
         locations: {
           include: {
+            machines: true,
+            availabilities: {
+              orderBy: {
+                availableDate: 'desc',
+              },
+              take: 10,
+            },
             _count: {
               select: {
                 appointments: true,
@@ -22,7 +29,6 @@ export async function GET(
             },
           },
         },
-        machines: true,
         sharpenerAppointments: {
           include: {
             user: {
@@ -43,7 +49,7 @@ export async function GET(
           },
           take: 20, // Last 20 appointments
         },
-        receivedRatings: {
+        sharpenerRatings: {
           include: {
             user: {
               select: {
@@ -55,12 +61,6 @@ export async function GET(
           orderBy: {
             createdAt: 'desc',
           },
-        },
-        availabilities: {
-          orderBy: {
-            date: 'desc',
-          },
-          take: 10, // Next 10 availabilities
         },
       },
     })
@@ -81,10 +81,10 @@ export async function GET(
       cancelled: sharpener.sharpenerAppointments.filter((a: any) => a.status === 'CANCELLED').length,
       denied: sharpener.sharpenerAppointments.filter((a: any) => a.status === 'DENIED').length,
       noShow: sharpener.sharpenerAppointments.filter((a: any) => a.status === 'NO_SHOW').length,
-      ratingsReceived: sharpener.receivedRatings.length,
+      ratingsReceived: sharpener.sharpenerRatings.length,
       averageRating: sharpener.averageRating || 0,
       locations: sharpener.locations.length,
-      machines: sharpener.machines.length,
+      machines: sharpener.locations.reduce((total: number, loc: any) => total + loc.machines.length, 0),
     }
 
     return NextResponse.json({
