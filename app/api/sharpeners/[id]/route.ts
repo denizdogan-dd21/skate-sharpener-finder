@@ -52,7 +52,7 @@ export async function GET(
             }
           }
         },
-        receivedRatings: {
+        sharpenerRatings: {
           orderBy: {
             createdAt: 'desc'
           },
@@ -181,7 +181,7 @@ export async function GET(
         machines: location.machines,
         availabilities: location.availabilities.map(adjustAvailabilityTimes).filter(avail => avail.startTime < avail.endTime),
       })),
-      recentReviews: sharpener.receivedRatings.map(rating => ({
+      recentReviews: sharpener.sharpenerRatings.map(rating => ({
         ratingId: rating.ratingId,
         rating: rating.rating,
         comment: rating.comment,
