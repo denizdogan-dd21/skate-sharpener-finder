@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { signIn } from 'next-auth/react'
 
 type AccountType = 'user' | 'sharpener' | 'admin'
 
