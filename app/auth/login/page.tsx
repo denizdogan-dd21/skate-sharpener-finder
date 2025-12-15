@@ -60,7 +60,7 @@ export default function LoginPage() {
         const signInResult = await signIn('credentials', {
           email: data.email,
           password: 'verified',
-          accountType: accountType,
+          accountType: formData.accountType,
           skipPasswordCheck: 'true',
           redirect: false,
         })
@@ -72,9 +72,9 @@ export default function LoginPage() {
         }
 
         // Redirect based on account type
-        if (accountType === 'admin') {
+        if (formData.accountType === 'admin') {
           router.push('/admin/dashboard')
-        } else if (accountType === 'sharpener') {
+        } else if (formData.accountType === 'sharpener') {
           router.push('/dashboard')
         } else {
           router.push('/search')
