@@ -58,7 +58,7 @@ export async function GET(
           },
           take: 10,
           include: {
-            customer: {
+            user: {
               select: {
                 firstName: true,
                 lastName: true,
@@ -185,7 +185,7 @@ export async function GET(
         ratingId: rating.ratingId,
         rating: rating.rating,
         comment: rating.comment,
-        userName: `${rating.customer.firstName} ${rating.customer.lastName}`,
+        userName: `${rating.user.firstName} ${rating.user.lastName}`,
         createdAt: rating.createdAt,
       }))
     }

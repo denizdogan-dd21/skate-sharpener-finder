@@ -24,7 +24,7 @@ export async function POST(
       where: { appointmentId },
       include: {
         sharpener: true,
-        customer: true,
+        user: true,
       },
     })
 
