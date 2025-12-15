@@ -1156,7 +1156,7 @@ function DashboardContent() {
                       step="0.01"
                       required
                       className="input-field"
-                      placeholder="15.00"
+                      placeholder="10.00"
                       value={availabilityForm.price}
                       onChange={(e) => setAvailabilityForm({ ...availabilityForm, price: e.target.value })}
                     />
