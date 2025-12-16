@@ -167,22 +167,6 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
-
-        {/* Admin Features */}
-        <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-green-900 mb-2">
-            ✅ Available Admin Features
-          </h3>
-          <ul className="list-disc list-inside text-green-800 space-y-1">
-            <li>User management</li>
-            <li>Sharpener management</li>
-            <li>Appointment management</li>
-            <li>No-show tracking</li>
-            <li>Account status filters</li>
-            <li>Audit logging</li>
-            <li>Two-factor authentication</li>
-          </ul>
-        </div>
       </div>
     </div>
   )
