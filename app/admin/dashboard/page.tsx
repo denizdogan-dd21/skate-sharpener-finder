@@ -132,7 +132,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <p className="text-sm font-medium text-gray-600">Average Rating</p>
             <p className="text-2xl font-bold text-yellow-600">
-              {stats.averageRating.toFixed(2)} ⭐
+              {stats.totalRatings > 0 ? `${stats.averageRating.toFixed(2)} ⭐` : '-'}
             </p>
           </div>
         </div>
