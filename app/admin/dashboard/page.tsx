@@ -173,17 +173,14 @@ export default function AdminDashboard() {
           <h3 className="text-lg font-semibold text-green-900 mb-2">
             ✅ Available Admin Features
           </h3>
-          <p className="text-green-800 mb-3">
-            All core admin features are now available:
-          </p>
           <ul className="list-disc list-inside text-green-800 space-y-1">
-            <li>User management - View, suspend, unsuspend, activate, and deactivate accounts</li>
-            <li>Sharpener management - Complete oversight with locations, machines, appointments, and ratings</li>
-            <li>Appointment management - View all appointments with status filters</li>
-            <li>No-show tracking - Sharpeners can mark appointments as no-show</li>
-            <li>Account status filters - Filter by active, suspended, or inactive accounts</li>
-            <li>Audit logging - All admin actions are logged in the database</li>
-            <li>Two-factor authentication - Email-based OTP with device trust for 180 days</li>
+            <li>User management</li>
+            <li>Sharpener management</li>
+            <li>Appointment management</li>
+            <li>No-show tracking</li>
+            <li>Account status filters</li>
+            <li>Audit logging</li>
+            <li>Two-factor authentication</li>
           </ul>
         </div>
       </div>
