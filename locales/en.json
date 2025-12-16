@@ -250,7 +250,11 @@
       "status": "Status",
       "notes": "Notes",
       "acceptButton": "Accept",
-      "denyButton": "Deny"
+      "denyButton": "Deny",
+      "confirmedTitle": "Confirmed Appointments",
+      "noConfirmed": "No confirmed appointments",
+      "pastTitle": "Past Appointments",
+      "noPast": "No past appointments"
     }
   },
   "booking": {

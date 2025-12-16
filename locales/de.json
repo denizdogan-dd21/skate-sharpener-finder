@@ -250,7 +250,11 @@
       "status": "Status",
       "notes": "Notizen",
       "acceptButton": "Annehmen",
-      "denyButton": "Ablehnen"
+      "denyButton": "Ablehnen",
+      "confirmedTitle": "Bestätigte Termine",
+      "noConfirmed": "Keine bestätigten Termine",
+      "pastTitle": "Vergangene Termine",
+      "noPast": "Keine vergangenen Termine"
     }
   },
   "booking": {
