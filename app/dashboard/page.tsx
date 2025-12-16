@@ -468,6 +468,7 @@ function DashboardContent() {
         if (!res.ok) {
           const data = await res.json()
           setError(data.error || `Failed to add availability for week ${week + 1}`)
+          setIsSubmittingAvailability(false)
           return
         }
       }
@@ -1188,7 +1189,9 @@ function DashboardContent() {
                   <div className="flex gap-3">
                     <button 
                       type="submit" 
-                      className="btn-primary flex-1 flex items-center justify-center gap-2"
+                      className={`btn-primary flex-1 flex items-center justify-center gap-2 ${
+                        isSubmittingAvailability ? 'opacity-70 cursor-not-allowed' : ''
+                      }`}
                       disabled={isSubmittingAvailability}
                     >
                       {isSubmittingAvailability && (
