@@ -1316,18 +1316,19 @@ function DashboardContent() {
                             className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
                           />
                           <div>
-                          <p className="font-bold text-gray-900">
-                            {new Date(avail.availableDate).toLocaleDateString('en-US', {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {avail.startTime} - {avail.endTime}
-                          </p>
-                          <p className="text-sm text-gray-600">{avail.machine?.machineType}</p>
+                            <p className="font-bold text-gray-900">
+                              {new Date(avail.availableDate).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {avail.startTime} - {avail.endTime}
+                            </p>
+                            <p className="text-sm text-gray-600">{avail.machine?.machineType}</p>
+                          </div>
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-primary-600">${avail.price}</p>
