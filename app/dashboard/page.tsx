@@ -55,6 +55,7 @@ function DashboardContent() {
 
   const [editingAvailability, setEditingAvailability] = useState<number | null>(null)
   const [isSubmittingAvailability, setIsSubmittingAvailability] = useState(false)
+  const [selectedAvailabilities, setSelectedAvailabilities] = useState<number[]>([])
 
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -544,6 +545,65 @@ function DashboardContent() {
       }
     } catch (err) {
       setError('An error occurred')
+    }
+  }
+
+  const handleDeleteSelectedAvailabilities = async () => {
+    if (selectedAvailabilities.length === 0) {
+      setError('Please select availabilities to delete')
+      return
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedAvailabilities.length} selected availability(ies)?`)) {
+      return
+    }
+
+    setError('')
+    setMessage('')
+
+    try {
+      let successCount = 0
+      let failCount = 0
+
+      for (const availabilityId of selectedAvailabilities) {
+        const res = await fetch(`/api/sharpener/availability/${availabilityId}`, {
+          method: 'DELETE'
+        })
+
+        if (res.ok) {
+          successCount++
+        } else {
+          failCount++
+        }
+      }
+
+      if (successCount > 0) {
+        setMessage(`Successfully deleted ${successCount} availability(ies)${failCount > 0 ? `, ${failCount} failed` : ''}`)
+        setSelectedAvailabilities([])
+        if (selectedLocation && selectedMachine) {
+          loadAvailabilities(selectedLocation, selectedMachine)
+        }
+      } else {
+        setError('Failed to delete availabilities')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const toggleAvailabilitySelection = (availabilityId: number) => {
+    setSelectedAvailabilities(prev =>
+      prev.includes(availabilityId)
+        ? prev.filter(id => id !== availabilityId)
+        : [...prev, availabilityId]
+    )
+  }
+
+  const toggleSelectAllAvailabilities = () => {
+    if (selectedAvailabilities.length === availabilities.length) {
+      setSelectedAvailabilities([])
+    } else {
+      setSelectedAvailabilities(availabilities.map(a => a.availabilityId))
     }
   }
 
@@ -1217,7 +1277,27 @@ function DashboardContent() {
             </div>
 
             <div className="card">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('dashboard.availability.your')}</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.availability.your')}</h2>
+                {availabilities.length > 0 && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={toggleSelectAllAvailabilities}
+                      className="text-sm bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded transition"
+                    >
+                      {selectedAvailabilities.length === availabilities.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                    {selectedAvailabilities.length > 0 && (
+                      <button
+                        onClick={handleDeleteSelectedAvailabilities}
+                        className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition"
+                      >
+                        Delete Selected ({selectedAvailabilities.length})
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {availabilities.length === 0 ? (
                   <p className="text-gray-500">{t('dashboard.availability.none')}</p>
@@ -1225,10 +1305,17 @@ function DashboardContent() {
                   availabilities.map((avail) => (
                     <div
                       key={avail.availabilityId}
-                      className={`p-3 border rounded-lg border-green-300 bg-green-50 ${editingAvailability === avail.availabilityId ? 'ring-2 ring-primary-600' : ''}`}
+                      className={`p-3 border rounded-lg border-green-300 bg-green-50 ${editingAvailability === avail.availabilityId ? 'ring-2 ring-primary-600' : ''} ${selectedAvailabilities.includes(avail.availabilityId) ? 'ring-2 ring-blue-500' : ''}`}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div>
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedAvailabilities.includes(avail.availabilityId)}
+                            onChange={() => toggleAvailabilitySelection(avail.availabilityId)}
+                            className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+                          />
+                          <div>
                           <p className="font-bold text-gray-900">
                             {new Date(avail.availableDate).toLocaleDateString('en-US', {
                               weekday: 'short',
