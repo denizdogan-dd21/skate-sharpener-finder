@@ -237,7 +237,10 @@
       "addButton": "Add Availability",
       "deleteButton": "Delete",
       "repeatWeeks": "Weekly repetition (number of weeks)",
-      "repeatHelper": "Creates the same time slot for the next X weeks (e.g., every Monday from 9:00-17:00)"
+      "repeatHelper": "Creates the same time slot for the next X weeks (e.g., every Monday from 9:00-17:00)",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "deleteSelected": "Delete Selected ({count})"
     },
     "appointments": {
       "title": "Appointment Requests",

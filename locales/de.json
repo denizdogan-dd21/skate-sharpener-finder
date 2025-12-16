@@ -237,7 +237,10 @@
       "addButton": "Verfügbarkeit hinzufügen",
       "deleteButton": "Löschen",
       "repeatWeeks": "Wöchentliche Wiederholung (Anzahl der Wochen)",
-      "repeatHelper": "Erstellt denselben Zeitslot für die nächsten X Wochen (z.B., jeden Montag von 9:00-17:00)"
+      "repeatHelper": "Erstellt denselben Zeitslot für die nächsten X Wochen (z.B., jeden Montag von 9:00-17:00)",
+      "selectAll": "Alle auswählen",
+      "deselectAll": "Alle abwählen",
+      "deleteSelected": "Ausgewählte löschen ({count})"
     },
     "appointments": {
       "title": "Terminanfragen",

@@ -1289,7 +1289,7 @@ function DashboardContent() {
                       onClick={toggleSelectAllAvailabilities}
                       className="text-sm bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded transition"
                     >
-                      {selectedAvailabilities.length === availabilities.length ? 'Deselect All' : 'Select All'}
+                      {selectedAvailabilities.length === availabilities.length ? t('dashboard.availability.deselectAll') : t('dashboard.availability.selectAll')}
                     </button>
                     {selectedAvailabilities.length > 0 && (
                       <button
@@ -1305,7 +1305,7 @@ function DashboardContent() {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
                         )}
-                        Delete Selected ({selectedAvailabilities.length})
+                        {t('dashboard.availability.deleteSelected', { count: selectedAvailabilities.length })}
                       </button>
                     )}
                   </div>
