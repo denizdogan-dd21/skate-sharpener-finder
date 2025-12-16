@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.appointment.count({ where: { status: 'COMPLETED' } }),
-      prisma.rating.count(),
+      prisma.rating.count({ where: { rating: { not: null } } }),
     ])
 
     // Get average rating across all sharpeners
