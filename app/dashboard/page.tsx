@@ -700,10 +700,10 @@ function DashboardContent() {
 
             {/* Confirmed Appointments */}
             <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Confirmed Appointments</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t('dashboard.appointments.confirmedTitle')}</h3>
               <div className="space-y-4">
                 {appointments.filter(a => a.status === 'CONFIRMED').length === 0 ? (
-                  <p className="text-gray-500">No confirmed appointments</p>
+                  <p className="text-gray-500">{t('dashboard.appointments.noConfirmed')}</p>
                 ) : (
                   appointments.filter(a => a.status === 'CONFIRMED').map((apt) => (
                     <div key={apt.appointmentId} className="card bg-green-50 border-2 border-green-300">
@@ -757,10 +757,10 @@ function DashboardContent() {
 
             {/* Past Appointments */}
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Past Appointments</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t('dashboard.appointments.pastTitle')}</h3>
               <div className="space-y-4">
                 {appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED', 'NO_SHOW'].includes(a.status)).length === 0 ? (
-                  <p className="text-gray-500">No past appointments</p>
+                  <p className="text-gray-500">{t('dashboard.appointments.noPast')}</p>
                 ) : (
                   appointments.filter(a => ['COMPLETED', 'RATED', 'DENIED', 'CANCELLED', 'NO_SHOW'].includes(a.status)).map((apt) => (
                     <div key={apt.appointmentId} className="card bg-gray-50">
