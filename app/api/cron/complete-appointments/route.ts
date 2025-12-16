@@ -61,8 +61,8 @@ export async function GET(request: NextRequest) {
             appointmentId: apt.appointmentId,
             userId: apt.userId,
             sharpenerId: apt.sharpener.userId,
-            rating: 0,
-            comment: '',
+            rating: null,
+            comment: null,
           }
         })
       }

@@ -235,8 +235,8 @@ export async function PATCH(
             appointmentId: appointment.appointmentId,
             userId: appointment.userId,
             sharpenerId: appointment.sharpenerId,
-            rating: 0, // Placeholder
-            comment: '',
+            rating: null, // Null until customer submits rating
+            comment: null,
           }
         })
       }
