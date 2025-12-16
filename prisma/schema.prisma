@@ -149,7 +149,7 @@ model Rating {
   appointmentId    Int                    @unique
   userId           Int
   sharpenerId      Int
-  rating           Int                    // 1-5
+  rating           Int?                   // 1-5, null until customer rates
   comment          String?
   createdAt        DateTime               @default(now())
   

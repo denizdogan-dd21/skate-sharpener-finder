@@ -48,8 +48,8 @@ export async function GET(
           appointmentId: appointment.appointmentId,
           userId: appointment.userId,
           sharpenerId: appointment.sharpenerId,
-          rating: 0,
-          comment: '',
+          rating: null,
+          comment: null,
         }
       })
     }
