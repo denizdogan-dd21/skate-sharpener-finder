@@ -26,7 +26,20 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const user = session?.user
 
   const handleSignOut = async () => {
+    // Preserve device trust cookie before sign out
+    const deviceTrusted = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('device_trusted='))
+      ?.split('=')[1]
+    
     await signOut({ redirect: false })
+    
+    // Restore device trust cookie after sign out if it existed
+    if (deviceTrusted) {
+      const maxAge = 180 * 24 * 60 * 60 // 180 days in seconds
+      document.cookie = `device_trusted=${deviceTrusted}; path=/; max-age=${maxAge}; samesite=lax${process.env.NODE_ENV === 'production' ? '; secure' : ''}`
+    }
+    
     router.push('/')
     router.refresh()
   }

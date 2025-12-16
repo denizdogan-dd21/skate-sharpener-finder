@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const deviceToken = Buffer.from(`${email}:${userType}:${Date.now()}`).toString('base64')
     
     response.cookies.set('device_trusted', deviceToken, {
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript access so we can preserve it during logout
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60, // 180 days
