@@ -71,14 +71,16 @@ export async function POST(request: NextRequest) {
     
     if (deviceToken) {
       try {
-        const decoded = Buffer.from(deviceToken, 'base64').toString('utf-8')
-        const [cookieEmail, cookieUserType, timestamp] = decoded.split(':')
+        const trustedDevices: Record<string, number> = JSON.parse(
+          Buffer.from(deviceToken, 'base64').toString('utf-8')
+        )
         
-        // Verify cookie matches current login and is not expired (180 days)
+        const accountKey = `${email}:${userType}`
+        const timestamp = trustedDevices[accountKey]
+        
+        // Verify account is trusted and not expired (180 days)
         const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000
-        if (cookieEmail === email && 
-            cookieUserType === userType && 
-            Date.now() - parseInt(timestamp) < oneEightyDaysInMs) {
+        if (timestamp && Date.now() - timestamp < oneEightyDaysInMs) {
           skipOTP = true
         }
       } catch (e) {
