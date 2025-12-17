@@ -79,8 +79,24 @@ export async function POST(request: NextRequest) {
       userType: user.userType,
     })
 
-    // Create a device token (combination of email and userType)
-    const deviceToken = Buffer.from(`${email}:${userType}:${Date.now()}`).toString('base64')
+    // Get existing trusted devices from cookie
+    const existingCookie = request.cookies.get('device_trusted')?.value
+    let trustedDevices: Record<string, number> = {}
+    
+    if (existingCookie) {
+      try {
+        trustedDevices = JSON.parse(Buffer.from(existingCookie, 'base64').toString('utf-8'))
+      } catch (e) {
+        // Invalid format, start fresh
+      }
+    }
+    
+    // Add this account to trusted devices
+    const accountKey = `${email}:${userType}`
+    trustedDevices[accountKey] = Date.now()
+    
+    // Create updated device token
+    const deviceToken = Buffer.from(JSON.stringify(trustedDevices)).toString('base64')
     
     response.cookies.set('device_trusted', deviceToken, {
       httpOnly: false, // Allow JavaScript access so we can preserve it during logout
