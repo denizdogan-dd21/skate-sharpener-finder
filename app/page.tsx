@@ -3,12 +3,39 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
+import Script from 'next/script'
 
 export default function Home() {
   const t = useTranslations()
   
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Skate Sharpener Connection",
+    "description": "Connect with trusted ice hockey skate sharpening professionals. Browse profiles, view availability, and book appointments.",
+    "url": "https://skatesharpener.app",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "Offer",
+      "category": "Professional Services"
+    },
+    "featureList": [
+      "Find local skate sharpeners",
+      "View sharpener profiles and ratings",
+      "Book appointments online",
+      "Real-time availability",
+      "Customer reviews and ratings"
+    ]
+  }
+  
   return (
-    <div className="bg-gradient-to-b from-primary-50 to-white">
+    <>
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="bg-gradient-to-b from-primary-50 to-white">
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
         <div className="text-center">
@@ -107,5 +134,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   )
 }
