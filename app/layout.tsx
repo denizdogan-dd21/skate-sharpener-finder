@@ -32,12 +32,25 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       .find(row => row.startsWith('device_trusted='))
       ?.split('=')[1]
     
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Signing out, preserving device_trusted cookie:', deviceTrusted ? 'found' : 'not found')
+    }
+    
     await signOut({ redirect: false })
     
     // Restore device trust cookie after sign out if it existed
     if (deviceTrusted) {
       const maxAge = 180 * 24 * 60 * 60 // 180 days in seconds
-      document.cookie = `device_trusted=${deviceTrusted}; path=/; max-age=${maxAge}; samesite=lax${process.env.NODE_ENV === 'production' ? '; secure' : ''}`
+      const cookieString = `device_trusted=${deviceTrusted}; path=/; max-age=${maxAge}; samesite=lax${process.env.NODE_ENV === 'production' ? '; secure' : ''}`
+      document.cookie = cookieString
+      
+      // Verify cookie was set
+      setTimeout(() => {
+        const restored = document.cookie.includes('device_trusted=')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Device trust cookie restored:', restored)
+        }
+      }, 100)
     }
     
     router.push('/')

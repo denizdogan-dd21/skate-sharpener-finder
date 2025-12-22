@@ -57,6 +57,7 @@ export default function LoginPage() {
         router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}&userType=${data.userType}`)
       } else {
         // Device is trusted, sign in directly
+        console.log('Device is trusted, signing in without OTP')
         const signInResult = await signIn('credentials', {
           email: data.email,
           password: 'verified',
