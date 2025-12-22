@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Set a secure cookie to remember this device for 30 days
+    // Set a secure cookie to remember this device for 180 days
     const response = NextResponse.json({
       success: true,
       userId: user.userId,
@@ -88,23 +88,39 @@ export async function POST(request: NextRequest) {
         trustedDevices = JSON.parse(Buffer.from(existingCookie, 'base64').toString('utf-8'))
       } catch (e) {
         // Invalid format, start fresh
+        console.log('Invalid device_trusted cookie format, starting fresh')
       }
     }
     
-    // Add this account to trusted devices
+    // Add this account to trusted devices with current timestamp
     const accountKey = `${email}:${userType}`
     trustedDevices[accountKey] = Date.now()
+    
+    // Clean up expired entries (older than 180 days)
+    const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000
+    Object.keys(trustedDevices).forEach(key => {
+      if (Date.now() - trustedDevices[key] > oneEightyDaysInMs) {
+        delete trustedDevices[key]
+      }
+    })
     
     // Create updated device token
     const deviceToken = Buffer.from(JSON.stringify(trustedDevices)).toString('base64')
     
+    // Set cookie with proper configuration for persistence
     response.cookies.set('device_trusted', deviceToken, {
       httpOnly: false, // Allow JavaScript access so we can preserve it during logout
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 180 * 24 * 60 * 60, // 180 days
+      maxAge: 180 * 24 * 60 * 60, // 180 days in seconds
       path: '/',
     })
+    
+    // Log for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✓ Device trusted for:', accountKey)
+      console.log('Total trusted devices:', Object.keys(trustedDevices).length)
+    }
 
     return response
   } catch (error) {

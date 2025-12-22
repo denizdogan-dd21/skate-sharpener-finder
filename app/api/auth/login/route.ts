@@ -82,9 +82,21 @@ export async function POST(request: NextRequest) {
         const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000
         if (timestamp && Date.now() - timestamp < oneEightyDaysInMs) {
           skipOTP = true
+          
+          if (process.env.NODE_ENV === 'development') {
+            const daysAgo = Math.floor((Date.now() - timestamp) / (24 * 60 * 60 * 1000))
+            console.log(`✓ Device trusted for ${accountKey} (verified ${daysAgo} days ago)`)
+          }
+        } else if (timestamp) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`✗ Device trust expired for ${accountKey}`)
+          }
         }
       } catch (e) {
         // Invalid cookie format, proceed with OTP
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✗ Invalid device_trusted cookie format')
+        }
       }
     }
 
