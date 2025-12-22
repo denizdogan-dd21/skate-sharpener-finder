@@ -1,6 +1,6 @@
 {
   "name": "skate-sharpener-finder",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A web application connecting skate sharpeners with customers",
   "scripts": {
     "dev": "next dev",
