@@ -8,7 +8,7 @@ import { LayoutClient } from './layout-client'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://skatesharpener.app'
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://skate-sharpener-finder.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
